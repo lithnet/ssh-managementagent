@@ -1,0 +1,612 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="Lithnet.SshMA"
+    xmlns:sshma="http://lithnet.local/Lithnet.SshMA.xsd"
+    targetNamespace="http://lithnet.local/Lithnet.SshMA.xsd"
+    elementFormDefault="unqualified"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="Lithnet.SshMA">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ma-capabilities" type="sshma:capabilities" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="schema" minOccurs="1" maxOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="schema-attributes" minOccurs="1" maxOccurs="1">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="schema-attribute" type="sshma:schema-attribute" minOccurs="1" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="schema-objects" minOccurs="1" maxOccurs="1">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="schema-object" type="sshma:schema-object" minOccurs="1" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="global-operations" type="sshma:global-operations" minOccurs="1" maxOccurs="unbounded"/>
+        <xs:element name="object-operations" type="sshma:object-operations" minOccurs="1" maxOccurs="unbounded"/>
+        <xs:element name="rules" type="sshma:rules" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="capabilities">
+    <xs:sequence>
+      <xs:element name="delta-import" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="object-update-mode" type="sshma:enum-update-mode" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="delete-add-as-replace" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="object-rename-allowed" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="schema-attribute">
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="type" type="sshma:enum-attribute-type" use="required"/>
+    <xs:attribute name="multivalued" type="xs:boolean" use="required"/>
+    <xs:attribute name="operation" type="sshma:enum-operation-type" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="schema-object">
+    <xs:sequence>
+      <xs:element name="dn-format" type="xs:string" minOccurs="1" maxOccurs="1" nillable="false"/>
+      <xs:element name="attributes" minOccurs="1" maxOccurs="unbounded" nillable="false">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="attribute" type="xs:string" minOccurs="1" maxOccurs="unbounded" nillable="false"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="objectclass" type="xs:string" use="required"/>
+  </xs:complexType>
+
+
+
+  <xs:complexType name="rules">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="rule-group" type="sshma:rule-group" minOccurs="0" maxOccurs="unbounded" nillable="false"/>
+      <xs:element name="rule" type="sshma:rule" minOccurs="0" maxOccurs="unbounded" nillable="false"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="object-operations">
+    <xs:sequence>
+      <xs:element name="operation" type="sshma:object-operation" minOccurs="1" maxOccurs="unbounded" nillable="false"/>
+    </xs:sequence>
+    <xs:attribute name="class" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="global-operations">
+    <xs:sequence>
+      <xs:element name="operation" type="sshma:global-operation" minOccurs="1" maxOccurs="unbounded" nillable="false"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="object-operation" abstract="true">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="global-operation" abstract="true">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="operation-ImportFull">
+    <xs:complexContent>
+      <xs:extension base="sshma:object-operation">
+        <xs:sequence>
+          <xs:element name="commands" type="sshma:import-commands" minOccurs="0" maxOccurs="unbounded" nillable="false"/>
+          <xs:element name="import-mapping" type="sshma:import-mapping"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="import-mapping">
+    <xs:sequence>
+      <xs:element name="object-extract" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multivalue-extracts" type="sshma:multivalue-extracts" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="attribute-transformations" type="sshma:attribute-transformations" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="object-filters" type="sshma:object-filters" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="import-mapping-delta">
+    <xs:complexContent>
+      <xs:extension base="sshma:import-mapping">
+        <xs:sequence>
+          <xs:element name="modification-type-mappings" type="sshma:modification-type-mappings" minOccurs="1" maxOccurs="1"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="export-mappings">
+    <xs:complexContent>
+      <xs:extension base="sshma:object-operation">
+        <xs:sequence>
+          <xs:element name="attribute-transformation" type="sshma:attribute-transformation" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="attribute-transformation">
+    <xs:attribute name="attribute" type="xs:string" use="required"/>
+    <xs:attribute name="regex-find" type="xs:string" use="required"/>
+    <xs:attribute name="regex-replace" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="multivalue-extracts">
+    <xs:sequence>
+      <xs:element name="multivalue-extract" type="sshma:multivalue-extract" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="attribute-transformations">
+    <xs:sequence>
+      <xs:element name="attribute-transformation" type="sshma:attribute-transformation" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="multivalue-extract">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="attribute" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="operation-ImportDelta">
+    <xs:complexContent>
+      <xs:extension base="sshma:object-operation">
+        <xs:sequence>
+          <xs:element name="commands" type="sshma:import-commands" minOccurs="0" maxOccurs="unbounded" nillable="false"/>
+          <xs:element name="import-mapping" type="sshma:import-mapping-delta"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="modification-type-mappings">
+    <xs:sequence>
+      <xs:element name="modification-type-add" type="xs:string" minOccurs="1" maxOccurs="1" nillable="false"/>
+      <xs:element name="modification-type-replace" type="xs:string" minOccurs="1" maxOccurs="1" nillable="false"/>
+      <xs:element name="modification-type-delete" type="xs:string" minOccurs="1" maxOccurs="1" nillable="false"/>
+    </xs:sequence>
+    <xs:attribute name="capture-group-name" type="xs:string" use="required"/>
+    <xs:attribute name="unexpected-modification-type-action" type="sshma:enum-modification-type-unexpected-action" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="object-filters">
+    <xs:sequence>
+      <xs:element name="object-filter" type="sshma:object-filter" minOccurs="1" maxOccurs="unbounded" nillable="false"/>
+    </xs:sequence>
+  </xs:complexType>
+    
+  <xs:complexType name="object-filter">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="attribute" type="xs:string" use ="required"/>
+        <xs:attribute name="operator" type="sshma:enum-value-operator" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="operation-ExportAdd">
+    <xs:complexContent>
+      <xs:extension base="sshma:object-operation">
+        <xs:sequence>
+          <xs:element name="commands" type="sshma:export-commands" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="operation-ExportDelete">
+    <xs:complexContent>
+      <xs:extension base="sshma:object-operation">
+        <xs:sequence>
+          <xs:element name="commands" type="sshma:export-commands" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="operation-ExportModify">
+    <xs:complexContent>
+      <xs:extension base="sshma:object-operation">
+        <xs:sequence>
+          <xs:element name="commands" type="sshma:export-commands" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="operation-ImportFullStart">
+    <xs:complexContent>
+      <xs:extension base="sshma:global-operation">
+        <xs:sequence>
+          <xs:element name="commands" type="sshma:commands" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="operation-ImportFullEnd">
+    <xs:complexContent>
+      <xs:extension base="sshma:global-operation">
+        <xs:sequence>
+          <xs:element name="commands" type="sshma:commands" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="operation-ImportDeltaStart">
+    <xs:complexContent>
+      <xs:extension base="sshma:global-operation">
+        <xs:sequence>
+          <xs:element name="commands" type="sshma:commands" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="operation-ImportDeltaEnd">
+    <xs:complexContent>
+      <xs:extension base="sshma:global-operation">
+        <xs:sequence>
+          <xs:element name="commands" type="sshma:commands" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="operation-ExportStart">
+    <xs:complexContent>
+      <xs:extension base="sshma:global-operation">
+        <xs:sequence>
+          <xs:element name="commands" type="sshma:commands" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="operation-ExportEnd">
+    <xs:complexContent>
+      <xs:extension base="sshma:global-operation">
+        <xs:sequence>
+          <xs:element name="commands" type="sshma:commands" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="operation-PasswordSet">
+    <xs:complexContent>
+      <xs:extension base="sshma:object-operation">
+        <xs:sequence>
+          <xs:element name="commands" type="sshma:commands" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="operation-PasswordChange">
+    <xs:complexContent>
+      <xs:extension base="sshma:object-operation">
+        <xs:sequence>
+          <xs:element name="commands" type="sshma:commands" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  
+  <xs:complexType name="operation-PasswordStart">
+    <xs:complexContent>
+      <xs:extension base="sshma:global-operation">
+        <xs:sequence>
+          <xs:element name="commands" type="sshma:commands" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="operation-PasswordEnd">
+    <xs:complexContent>
+      <xs:extension base="sshma:global-operation">
+        <xs:sequence>
+          <xs:element name="commands" type="sshma:commands" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="commands">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="command" type="sshma:command"/>
+      <xs:element name="async-command" type="sshma:async-command"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="import-commands">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="command" type="sshma:import-command"/>
+      <xs:element name="async-command" type="sshma:async-command"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="export-commands">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="command" type="sshma:rule-based-command"/>
+      <xs:element name="async-command" type="sshma:rule-based-async-command"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="command">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="success-codes" type="xs:string" use="optional"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="import-command">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="success-codes" type="xs:string" use="optional"/>
+        <xs:attribute name="result-has-objects" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="rule-based-command">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="success-codes" type="xs:string" use="optional"/>
+        <xs:attribute name="rule-id" type="xs:IDREF" use="optional"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  
+  <xs:complexType name="async-command">
+    <xs:sequence>
+      <xs:element name="send" type ="sshma:send" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="success-when" type ="sshma:success-when" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="rule-based-async-command">
+    <xs:sequence>
+      <xs:element name="send" type ="sshma:send" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="success-when" type ="sshma:success-when" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute name="rule-id" type="xs:IDREF" use="optional"/>
+  </xs:complexType>
+
+  <xs:complexType name="mv-command">
+    <xs:simpleContent>
+      <xs:extension base="sshma:rule-based-command">
+        <xs:attribute name="for-each" type="xs:string" use="required"/>
+        <xs:attribute name="value-modification" type="sshma:enum-value-modification-type" use="optional"/>
+        <xs:attribute name="success-codes" type="xs:string" use="optional"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="for-each">
+    <xs:sequence>
+      <xs:element name="command" type="sshma:rule-based-command" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="attribute" type="xs:string" use="required"/>
+    <xs:attribute name="value-modification" type="sshma:enum-value-modification-type" use="optional"/>
+  </xs:complexType>
+
+  <xs:complexType name="send">
+    <xs:simpleContent>
+      <xs:extension base="xs:string"/>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="send-when">
+    <xs:complexContent>
+      <xs:extension base="sshma:send">
+        <xs:attributeGroup ref="sshma:expect-group"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="success-when">
+    <xs:attributeGroup ref="sshma:expect-group"/>
+  </xs:complexType>
+
+  <xs:attributeGroup name="expect-group">
+    <xs:attribute name="expect" type="xs:string" use="required"/>
+    <xs:attribute name="timeout" type="xs:integer" use="required"/>
+  </xs:attributeGroup>
+
+  <xs:complexType name="rule-group">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="rule" type="sshma:rule" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="rule-group" type="sshma:rule-group" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="rule-ref" type="sshma:rule-reference" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:choice>
+    <xs:attribute name="id" type="xs:ID" use ="required"/>
+    <xs:attribute name="operator" type="sshma:enum-rule-group-operator" use ="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="rule" abstract="true">
+    <xs:attribute name="id" type="xs:ID" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="rule-reference">
+    <xs:attribute name="rule-id" type="xs:IDREF" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="rule-MultiValuedAttributeValueRule">
+    <xs:complexContent>
+      <xs:extension base="sshma:rule">
+        <xs:attribute name="attribute" type="xs:string" use ="required"/>
+        <xs:attribute name="operator" type="sshma:enum-value-operator" use="required"/>
+        <xs:attribute name="multivalue-condition" type="sshma:enum-multivalue-condition" use="required"/>
+        <xs:attribute name="value" type="xs:string" use ="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="rule-SingleValuedAttributeValueRule">
+    <xs:complexContent>
+      <xs:extension base="sshma:rule">
+        <xs:attribute name="attribute" type="xs:string" use ="required"/>
+        <xs:attribute name="operator" type="sshma:enum-value-operator" use="required"/>
+        <xs:attribute name="value" type="xs:string" use ="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="rule-AttributePresenceRule">
+    <xs:complexContent>
+      <xs:extension base="sshma:rule">
+        <xs:attribute name="attribute" type="xs:string" use ="required"/>
+        <xs:attribute name="operator" type="sshma:enum-presence-operator" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="rule-AttributeChangeRule">
+    <xs:complexContent>
+      <xs:extension base="sshma:rule">
+        <xs:attribute name="attribute" type="xs:string" use ="required"/>
+        <xs:attribute name="triggers" type="sshma:enum-triggers" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="rule-ObjectChangeRule">
+    <xs:complexContent>
+      <xs:extension base="sshma:rule">
+        <xs:attribute name="triggers" type="sshma:enum-triggers" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:simpleType name="enum-value-operator">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Equals"/>
+      <xs:enumeration value="NotEquals"/>
+      <xs:enumeration value="GreaterThan"/>
+      <xs:enumeration value="LessThan"/>
+      <xs:enumeration value="GreaterThanOrEq"/>
+      <xs:enumeration value="LessThanOrEq"/>
+      <xs:enumeration value="IsPresent"/>
+      <xs:enumeration value="NotPresent"/>
+      <xs:enumeration value="Contains"/>
+      <xs:enumeration value="NotContains"/>
+      <xs:enumeration value="StartsWith"/>
+      <xs:enumeration value="EndsWith"/>
+      <xs:enumeration value="And"/>
+      <xs:enumeration value="Or"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="enum-attribute-type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="string"/>
+      <xs:enumeration value="binary"/>
+      <xs:enumeration value="boolean"/>
+      <xs:enumeration value="integer"/>
+      <xs:enumeration value="reference"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="enum-operation-type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ImportOnly"/>
+      <xs:enumeration value="ImportExport"/>
+      <xs:enumeration value="ExportOnly"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="enum-objectoperation-type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ImportStart"/>
+      <xs:enumeration value="ImportEnd"/>
+      <xs:enumeration value="ImportFull"/>
+      <xs:enumeration value="ExportStart"/>
+      <xs:enumeration value="ExportEnd"/>
+      <xs:enumeration value="ExportAdd"/>
+      <xs:enumeration value="ExportModify"/>
+      <xs:enumeration value="ExportDelete"/>
+      <xs:enumeration value="SetPasswordStart"/>
+      <xs:enumeration value="SetPasswordEnd"/>
+      <xs:enumeration value="SetPassword"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="enum-rule-group-operator">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="None"/>
+      <xs:enumeration value="And"/>
+      <xs:enumeration value="Or"/>
+      <xs:enumeration value="Xor"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="enum-modification-type-unexpected-action">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ignore"/>
+      <xs:enumeration value="error"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="enum-value-modification-type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="add"/>
+      <xs:enumeration value="delete"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="enum-update-mode">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="AttributeUpdate"/>
+      <xs:enumeration value="AttributeReplace"/>
+      <xs:enumeration value="ObjectReplace"/>
+      <xs:enumeration value="MultivaluedReferenceAttributeUpdate"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="enum-triggers">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Add"/>
+      <xs:enumeration value="Add,Update"/>
+      <xs:enumeration value="Add,Update,Delete"/>
+      <xs:enumeration value="Add,Delete"/>
+      <xs:enumeration value="Update,Delete"/>
+      <xs:enumeration value="Delete"/>
+      <xs:enumeration value="Update"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="enum-presence-operator">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="IsPresent"/>
+      <xs:enumeration value="NotPresent"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="enum-multivalue-condition">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Any"/>
+      <xs:enumeration value="All"/>
+      <xs:enumeration value="One"/>
+      <xs:enumeration value="None"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+</xs:schema>
