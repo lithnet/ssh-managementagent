@@ -22,7 +22,7 @@
     </schema-attributes>
 
     <schema-objects>
-      <schema-object objectclass="user">
+      <schema-object object-class="user">
         <dn-format>cn={accountName},ou=users</dn-format>
         <attributes>
           <attribute>accountName</attribute>
@@ -35,7 +35,7 @@
         </attributes>
       </schema-object>
 
-      <schema-object objectclass="group">
+      <schema-object object-class="group">
         <dn-format>cn={accountName},ou=groups</dn-format>
         <attributes>
           <attribute>accountName</attribute>
@@ -47,27 +47,23 @@
   </schema>
 
   <global-operations>
-    <!--<operation xsi:type="sshma:operation-ImportFullStart"/>
-    <operation xsi:type="sshma:operation-ImportFullEnd"/>
-    <operation xsi:type="sshma:operation-ImportDeltaStart"/>
-    <operation xsi:type="sshma:operation-ImportDeltaEnd"/>-->
-    <operation xsi:type="sshma:operation-ExportStart">
-      <commands>
-        <command success-codes="0,2">rm /usr/tmp/groups.txt</command>
-      </commands>
-    </operation>
-    <!--<operation xsi:type="sshma:operation-ExportEnd"/>
-    <operation xsi:type="sshma:operation-PasswordStart"/>
-    <operation xsi:type="sshma:operation-PasswordEnd"/>-->
+    <!--<global-operation xsi:type="sshma:global-operation-ImportFullStart"/>
+    <global-operation xsi:type="sshma:global-operation-ImportFullEnd"/>
+    <global-operation xsi:type="sshma:global-operation-ImportDeltaStart"/>
+    <global-operation xsi:type="sshma:global-operation-ImportDeltaEnd"/>
+    <global-operation xsi:type="sshma:global-operation-ExportStart"/>
+    <global-operation xsi:type="sshma:global-operation-ExportEnd"/>
+    <global-operation xsi:type="sshma:global-operation-PasswordStart"/>
+    <global-operation xsi:type="sshma:global-operation-PasswordEnd"/>-->
   </global-operations>
 
-  <object-operations class="user">
-    <operation xsi:type="sshma:operation-ImportFull">
+  <object-operations object-class="user">
+    <object-operation xsi:type="sshma:object-operation-ImportFull">
       <commands>
         <command result-has-objects="true" success-codes="0">cat /etc/passwd</command>
       </commands>
       <import-mapping>
-        <object-extract><![CDATA[^(?<accountName>.*?):(?<pwd>.*?):(?<uid>.*?):(?<gid>.*?)((:(?<comment>.*?),(?<monashPersonId>.*?):)|(:(?<comment>.*?):))(?<homeDirectory>.*?):(?<shell>.*?)$]]></object-extract>
+        <object-extract><![CDATA[^(?<accountName>.*?):(?<pwd>.*?):(?<uid>.*?):(?<gid>.*?)((:(?<comment>.*?),(?<personId>.*?):)|(:(?<comment>.*?):))(?<homeDirectory>.*?):(?<shell>.*?)$]]></object-extract>
         <object-filters>
           <!--<object-filter attribute="uid" operator="LessThanOrEq">99</object-filter>
         <object-filter attribute="uid" operator="Equals">65534</object-filter>
@@ -76,14 +72,14 @@
           <object-filter attribute="accountName" operator="Equals">svc-fim</object-filter>
         </object-filters>
       </import-mapping>
-    </operation>
+    </object-operation>
 
-    <operation xsi:type="sshma:operation-ImportDelta">
+    <object-operation xsi:type="sshma:object-operation-ImportDelta">
       <commands>
         <command success-codes="0" result-has-objects="true">cat /etc/passwd</command>
       </commands>
       <import-mapping>
-        <object-extract><![CDATA[^(?<changeType>[acd]):(?<accountName>.*?):(?<pwd>.*?):(?<uid>.*?):(?<gid>.*?)((:(?<comment>.*?),(?<monashPersonId>.*?):)|(:(?<comment>.*?):))(?<homeDirectory>.*?):(?<shell>.*?)$]]></object-extract>
+        <object-extract><![CDATA[^(?<changeType>[ard]):(?<accountName>.*?):(?<pwd>.*?):(?<uid>.*?):(?<gid>.*?)((:(?<comment>.*?),(?<personId>.*?):)|(:(?<comment>.*?):))(?<homeDirectory>.*?):(?<shell>.*?)$]]></object-extract>
         <object-filters>
           <!--<object-filter attribute="uid" operator="LessThanOrEq">99</object-filter>
           <object-filter attribute="uid" operator="Equals">65534</object-filter>
@@ -93,51 +89,51 @@
         </object-filters>
         <modification-type-mappings capture-group-name="changeType" unexpected-modification-type-action="ignore">
           <modification-type-add>a</modification-type-add>
-          <modification-type-replace>c</modification-type-replace>
+          <modification-type-replace>r</modification-type-replace>
           <modification-type-delete>d</modification-type-delete>
         </modification-type-mappings>
       </import-mapping>
-    </operation>
+    </object-operation>
 
-    <operation xsi:type="sshma:operation-ExportAdd">
+    <object-operation xsi:type="sshma:object-operation-ExportAdd">
       <commands>
         <command>/usr/local/bin/sudo /usr/sbin/useradd [-c "{comment}" ][-d {homeDirectory} ][-s {shell} ]-u {uid} -g {gid} {dn:$1}</command>
       </commands>
-    </operation>
+    </object-operation>
 
-    <operation xsi:type="sshma:operation-ExportModify">
+    <object-operation xsi:type="sshma:object-operation-ExportModify">
       <commands>
         <command>/usr/local/bin/sudo /usr/sbin/usermod [-c "{comment}" ][-d {homeDirectory} ][-s {shell} ][-u {uid} ][-g {gid} ][-l {accountName} ]{dn:$1}</command>
       </commands>
-    </operation>
+    </object-operation>
 
-    <operation xsi:type="sshma:operation-ExportDelete">
+    <object-operation xsi:type="sshma:object-operation-ExportDelete">
       <commands>
         <command>/usr/local/bin/sudo /usr/sbin/userdel {dn:$1}</command>
       </commands>
-    </operation>
+    </object-operation>
 
-    <operation xsi:type="sshma:operation-PasswordSet">
+    <object-operation xsi:type="sshma:object-operation-PasswordSet">
       <commands>
         <async-command>
-          <send xsi:type="sshma:send-when" expect="$ " timeout="5">/usr/local/bin/sudo /usr/bin/passwd {dn:$1}</send>
-          <send xsi:type="sshma:send-when" expect="New Password: " timeout="5">{newpassword}</send>
-          <send xsi:type="sshma:send-when" expect="assword: " timeout="5">{newpassword}</send>
+          <send-when expect="$ " timeout="5">/usr/local/bin/sudo /usr/bin/passwd {dn:$1}</send-when>
+          <send-when expect="New Password: " timeout="5">{newpassword}</send-when>
+          <send-when expect="assword: " timeout="5">{newpassword}</send-when>
           <success-when expect="password successfully changed for {dn:$1}" timeout="5"/>
         </async-command>
       </commands>
-    </operation>
+    </object-operation>
   </object-operations>
 
-  <object-operations class="group">
-    <operation xsi:type="sshma:operation-ImportFull">
+  <object-operations object-class="group">
+    <object-operation xsi:type="sshma:object-operation-ImportFull">
       <commands>
         <command result-has-objects="true">cat /etc/group</command>
       </commands>
       <import-mapping>
-        <object-extract><![CDATA[^(?<accountName>.+)?:\*?:(?<gid>.+)?:(?<member>.+)?$]]></object-extract>
+        <object-extract><![CDATA[^(?<accountName>.+)?:\*?:(?<gid>.+)?:(?<members>.+)?$]]></object-extract>
         <multivalue-extracts>
-          <multivalue-extract attribute="member"><![CDATA[[\w\d- ]+]]></multivalue-extract>
+          <multivalue-extract capture-group-name="members" attribute="member"><![CDATA[[\w\d- ]+]]></multivalue-extract>
         </multivalue-extracts>
         <attribute-transformations>
           <attribute-transformation attribute="member" regex-find=".+" regex-replace="cn=$&amp;,ou=users"/>
@@ -146,29 +142,29 @@
           <object-filter attribute="gid" operator="LessThan">100</object-filter>
         </object-filters>
       </import-mapping>
-    </operation>
+    </object-operation>
 
-    <operation xsi:type="sshma:operation-ExportAdd">
+    <object-operation xsi:type="sshma:object-operation-ExportAdd">
       <commands>
         <command>/usr/local/bin/sudo /usr/sbin/groupadd -g {gid} {dn:$1}</command>
         <command xsi:type="sshma:mv-command" for-each="member">echo addmember:{member:$1}</command>
       </commands>
-    </operation>
+    </object-operation>
 
-    <operation xsi:type="sshma:operation-ExportModify">
+    <object-operation xsi:type="sshma:object-operation-ExportModify">
       <commands>
         <command rule-id="groupGidOrAccountNameHasChanged">/usr/local/bin/sudo /usr/sbin/groupmod [-g {gid} ][-n {accountName} ]{dn:$1}</command>
         <command xsi:type="sshma:mv-command" rule-id="groupMemberModified" for-each="member" value-modification="add">echo addmember:{member:$1} {dn:$1}</command>
         <command xsi:type="sshma:mv-command" rule-id="groupMemberModified" for-each="member" value-modification="delete">echo deletemember:{member:$1} {dn:$1}</command>
         <command rule-id="groupMembersDeleted">echo deleteallmembers {dn:$1}</command>
       </commands>
-    </operation>
+    </object-operation>
 
-    <operation xsi:type="sshma:operation-ExportDelete">
+    <object-operation xsi:type="sshma:object-operation-ExportDelete">
       <commands>
         <command>/usr/local/bin/sudo /usr/sbin/groupdel {dn:$1}</command>
       </commands>
-    </operation>
+    </object-operation>
   </object-operations>
 
   <rules>
