@@ -26,7 +26,7 @@ namespace Lithnet.SshMA
         /// <returns>A System.IO.Stream object</returns>
         public static Stream GetSchemaStream()
         {
-            return Assembly.GetExecutingAssembly().GetManifestResourceStream("Lithnet.SshMA.Config.Lithnet.SSHMA.xsd");
+            return Assembly.GetExecutingAssembly().GetManifestResourceStream("Lithnet.SshMA.MAConfig.Lithnet.SSHMA.xsd");
         }
 
         /// <summary>

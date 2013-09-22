@@ -70,26 +70,11 @@ namespace Lithnet.SshMA
                     csentry.ObjectModificationType = GetObjectChangeTypeFromMatchCollection(matchCollection, operation);
                     csentry.ObjectType = schemaType.Name;
 
-                    foreach (MASchemaAttribute attribute in MASchema.Objects[schemaType.Name].Attributes.Where(t => schemaType.Attributes.Contains(t.Name)))
-                    {
-                        Group group = match.Groups[attribute.Name];
-                        if (!group.Success)
-                        {
-                            continue;
-                        }
-
-                        IList<object> values = GetAttributeValuesFromMatch(attribute, match, operation);
-
-                        if (values != null && values.Count > 0)
-                        {
-                            IList<object> transformedValues = TransformAttributeValues(attribute, operation, values);
-                            csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(attribute.Name, transformedValues));
-                        }
-                    }
+                    PopulateCSEntryWithMatches(schemaType, operation, match, csentry);
 
                     csentry.DN = MASchema.Objects[schemaType.Name].DNFormat.ExpandDeclaration(csentry, true);
                     csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd("entry-dn", csentry.DN));
-
+                    
                     if (string.IsNullOrEmpty(csentry.DN))
                     {
                         Logger.WriteLine("Discarding object from result as no DN could be derived: " + match.Value, LogLevel.Debug);
@@ -104,6 +89,47 @@ namespace Lithnet.SshMA
                     {
                         yield return csentry;
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Populates the CSEntryChange with the data found in the regular expression match
+        /// </summary>
+        /// <param name="schemaType">The type of schema object</param>
+        /// <param name="operation">The operation being performed</param>
+        /// <param name="match">The regular expression match containing the object with values to extract</param>
+        /// <param name="csentry">The CSEntryChange to populate</param>
+        private static void PopulateCSEntryWithMatches(SchemaType schemaType, ImportOperationBase operation, Match match, CSEntryChange csentry)
+        {
+            foreach (MASchemaAttribute attribute in MASchema.Objects[schemaType.Name].Attributes.Where(t => schemaType.Attributes.Contains(t.Name) && t.Operation != AttributeOperation.ExportOnly))
+            {
+                IList<object> values = new List<object>();
+                Group group = match.Groups[attribute.Name];
+
+                if (!group.Success)
+                {
+                    foreach (MultiValueExtract mapping in operation.MultiValuedAttributeMappings)
+                    {
+                        if (mapping.Attribute.Name == attribute.Name)
+                        {
+                            group = match.Groups[mapping.CaptureGroupName];
+                            if (group.Success)
+                            {
+                                values = values.Concat(GetAttributeValuesFromMatch(attribute, mapping, match, operation)).ToList<object>();
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    values = GetAttributeValuesFromMatch(attribute, match, operation);
+                }
+
+                if (values != null && values.Count > 0)
+                {
+                    IList<object> transformedValues = TransformAttributeValues(attribute, operation, values);
+                    csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd(attribute.Name, transformedValues));
                 }
             }
         }
@@ -128,24 +154,27 @@ namespace Lithnet.SshMA
 
             foreach (object value in values)
             {
-                newValues.Add(Regex.Replace(value.ToString(), transformation.RegexFind, transformation.RegexReplace));
+                string newValue = Regex.Replace(value.ToString(), transformation.RegexFind, transformation.RegexReplace);
+                newValues.Add(newValue);
             }
 
             return newValues;
         }
         
         /// <summary>
-        /// Extracts a list of attribute values from a regular expression match
+        /// Gets a list of attribute values from a regular expression match
         /// </summary>
-        /// <param name="attribute">The definition of the attribute to extract</param>
-        /// <param name="match">The regular expression match containing the values to extract</param>
-        /// <param name="operation">The operation being performed</param>
-        /// <returns>A list of attribute values extracted from the source</returns>
-        private static IList<object> GetAttributeValuesFromMatch(MASchemaAttribute attribute, Match match, ImportOperationBase operation)
+        /// <param name="attribute">The attribute to return the values for</param>
+        /// <param name="mapping">The multivalued extract mapping, or null, if this is a single valued attribute</param>
+        /// <param name="match">The regular expression match to extract the values from</param>
+        /// <param name="operation">The current operation being performed</param>
+        /// <returns>A list of values for the specified attribute</returns>
+        private static IList<object> GetAttributeValuesFromMatch(MASchemaAttribute attribute, MultiValueExtract mapping, Match match, ImportOperationBase operation)
         {
             List<object> values = new List<object>();
-               
-            Group group = match.Groups[attribute.Name];
+            string captureGroupName = mapping == null ? attribute.Name : mapping.CaptureGroupName;
+
+            Group group = match.Groups[captureGroupName];
             if (!group.Success)
             {
                 return null;
@@ -153,8 +182,6 @@ namespace Lithnet.SshMA
 
             if (attribute.IsMultiValued)
             {
-                MultiValueExtract mapping = operation.MultiValuedAttributeMappings.FirstOrDefault(t => t.Attribute.Name == attribute.Name);
-
                 if (mapping == null)
                 {
                     values.Add(group.Value);
@@ -175,6 +202,18 @@ namespace Lithnet.SshMA
             }
 
             return values;
+        }
+
+        /// <summary>
+        /// Extracts a list of attribute values from a regular expression match
+        /// </summary>
+        /// <param name="attribute">The definition of the attribute to extract</param>
+        /// <param name="match">The regular expression match containing the values to extract</param>
+        /// <param name="operation">The operation being performed</param>
+        /// <returns>A list of attribute values extracted from the source</returns>
+        private static IList<object> GetAttributeValuesFromMatch(MASchemaAttribute attribute, Match match, ImportOperationBase operation)
+        {
+            return GetAttributeValuesFromMatch(attribute, null, match, operation);
         }
 
         /// <summary>

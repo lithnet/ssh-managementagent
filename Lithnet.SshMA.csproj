@@ -65,6 +65,7 @@
     <DebugType>none</DebugType>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Lithnet.Logging, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.MetadirectoryServicesEx">
       <HintPath>C:\Program Files\Microsoft Forefront Identity Manager\2010\Synchronization Service\Bin\Assemblies\Microsoft.MetadirectoryServicesEx.dll</HintPath>
     </Reference>
@@ -87,19 +88,19 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ComparisonEngine.cs" />
-    <Compile Include="Config\AsyncCommand.cs" />
-    <Compile Include="Config\AttributeTransformation.cs" />
-    <Compile Include="Config\SshMACapabilities.cs" />
-    <Compile Include="Config\MultiValueExtract.cs" />
-    <Compile Include="Config\SyncCommand.cs" />
-    <Compile Include="Config\CommandBase.cs" />
-    <Compile Include="Config\AsyncCommandSendExpect.cs" />
-    <Compile Include="Config\MAConfig.cs" />
-    <Compile Include="Config\ValueDeclaration.cs" />
-    <Compile Include="Config\ObjectOperationGroupKeyedCollection.cs" />
-    <Compile Include="Config\ObjectFilter.cs" />
-    <Compile Include="Config\ReferencedAttribute.cs" />
-    <Compile Include="Config\AsyncCommandSend.cs" />
+    <Compile Include="MAConfig\AsyncCommand.cs" />
+    <Compile Include="MAConfig\AttributeTransformation.cs" />
+    <Compile Include="MAConfig\SshMACapabilities.cs" />
+    <Compile Include="MAConfig\MultiValueExtract.cs" />
+    <Compile Include="MAConfig\SyncCommand.cs" />
+    <Compile Include="MAConfig\CommandBase.cs" />
+    <Compile Include="MAConfig\AsyncCommandSendExpect.cs" />
+    <Compile Include="MAConfig\MAConfig.cs" />
+    <Compile Include="MAConfig\ValueDeclaration.cs" />
+    <Compile Include="MAConfig\ObjectOperationGroupKeyedCollection.cs" />
+    <Compile Include="MAConfig\ObjectFilter.cs" />
+    <Compile Include="MAConfig\ReferencedAttribute.cs" />
+    <Compile Include="MAConfig\AsyncCommandSend.cs" />
     <Compile Include="Enums\MultiValueCondition.cs" />
     <Compile Include="Enums\PresenceOperator.cs" />
     <Compile Include="Enums\TriggerEvents.cs" />
@@ -123,7 +124,7 @@
     <Compile Include="Operations\OperationBase.cs" />
     <Compile Include="Rules\AttributeChangeRule.cs" />
     <Compile Include="Rules\AttributePresenceRule.cs" />
-    <Compile Include="Config\ObjectOperationGroup.cs" />
+    <Compile Include="MAConfig\ObjectOperationGroup.cs" />
     <Compile Include="Rules\IRule.cs" />
     <Compile Include="Rules\MultiValuedAttributeValueRule.cs" />
     <Compile Include="Rules\ObjectChangeRule.cs" />
@@ -150,24 +151,18 @@
     <Compile Include="Enums\ValueOperator.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ConfigurationFiles\Solaris9\solaris9.xml" />
     <Content Include="Lithnet.Logging.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Lithnet.SSHMA.config.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Renci.SshNet.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="Renci.SshNet.dll" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Config\Lithnet.SSHMA.xsd">
+    <EmbeddedResource Include="MAConfig\Lithnet.SSHMA.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ExternalScripts\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent />

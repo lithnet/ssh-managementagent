@@ -30,11 +30,11 @@ namespace Lithnet.SshMA
         public MASchemaObject(XmlNode node)
             : this()
         {
-            XmlAttribute objectClassAttribute = node.Attributes["objectclass"];
+            XmlAttribute objectClassAttribute = node.Attributes["object-class"];
 
             if (objectClassAttribute == null || string.IsNullOrWhiteSpace(objectClassAttribute.Value))
             {
-                throw new ArgumentException("The schema-entry element must have a 'name' attribute");
+                throw new ArgumentException("The schema-entry element must have a 'object-class' attribute");
             }
 
             this.ObjectClass = objectClassAttribute.Value;
