@@ -312,7 +312,7 @@ namespace Lithnet.SshMA
 
                 foreach (MASchemaObject schemaObject in MASchema.Objects)
                 {
-                    Microsoft.MetadirectoryServices.SchemaType schemaType = Microsoft.MetadirectoryServices.SchemaType.Create(schemaObject.ObjectClass, false);
+                    SchemaType schemaType = SchemaType.Create(schemaObject.ObjectClass, true);
                     schemaType.Attributes.Add(SchemaAttribute.CreateAnchorAttribute("entry-dn", AttributeType.String, AttributeOperation.ImportOnly));
 
                     foreach (MASchemaAttribute attribute in schemaObject.Attributes)
@@ -403,7 +403,7 @@ namespace Lithnet.SshMA
             {
                 Logger.WriteLine("A exception occured during the open import connection operartion");
                 Logger.WriteException(ex);
-                throw new ExtensibleExtensionException("An aexception occured during the password set operation", ex);
+                throw new ExtensibleExtensionException("An exception occured during the open import connection operation", ex);
             }
 
             OpenImportConnectionResults results = new OpenImportConnectionResults();
@@ -500,7 +500,7 @@ namespace Lithnet.SshMA
             {
                 Logger.WriteLine("A exception occured during the open export connection operartion");
                 Logger.WriteException(ex);
-                throw new ExtensibleExtensionException("An aexception occured during the password set operation", ex);
+                throw new ExtensibleExtensionException("An exception occured during the open export connection operation", ex);
             }
 
             return new CloseImportConnectionResults();
@@ -554,7 +554,7 @@ namespace Lithnet.SshMA
             {
                 Logger.WriteLine("A exception occured during the open export connection operartion");
                 Logger.WriteException(ex);
-                throw new ExtensibleExtensionException("An aexception occured during the password set operation", ex);
+                throw new ExtensibleExtensionException("An exception occured during the open export connection operation", ex);
             }
         }
 
@@ -691,7 +691,7 @@ namespace Lithnet.SshMA
             {
                 Logger.WriteLine("A exception occured during the open password connection operartion");
                 Logger.WriteException(ex);
-                throw new ExtensibleExtensionException("An aexception occured during the password set operation", ex);
+                throw new ExtensibleExtensionException("An exception occured during the open password connection operation", ex);
             }
         }
 
@@ -770,7 +770,7 @@ namespace Lithnet.SshMA
             {
                 Logger.WriteLine("A exception occured during the password change operartion");
                 Logger.WriteException(ex);
-                throw new ExtensibleExtensionException("An aexception occured during the password change operation", ex);
+                throw new ExtensibleExtensionException("An exception occured during the password change operation", ex);
             }
         }
 
@@ -815,7 +815,7 @@ namespace Lithnet.SshMA
             {
                 Logger.WriteLine("A exception occured during the password set operartion");
                 Logger.WriteException(ex);
-                throw new ExtensibleExtensionException("An aexception occured during the password set operation", ex);
+                throw new ExtensibleExtensionException("An exception occured during the password set operation", ex);
             }
         }
 

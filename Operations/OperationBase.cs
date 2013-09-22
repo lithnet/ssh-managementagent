@@ -55,7 +55,8 @@ namespace Lithnet.SshMA
                 throw new ArgumentNullException("The rule type was not specified");
             }
 
-            string typeName = typeAttribute.Value.Replace("sshma:operation-", string.Empty);
+            string typeName = typeAttribute.Value.Replace("sshma:object-operation-", string.Empty);
+            typeName = typeName.Replace("sshma:global-operation-", string.Empty);
             typeName = typeName + "Operation";
 
             Type t = Type.GetType("Lithnet.SshMA." + typeName);
