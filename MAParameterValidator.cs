@@ -1,6 +1,9 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="MAParameterValidator.cs" company="Monash University">
-// TODO: Update copyright text.
+// The Microsoft Public License (Ms-PL) governs use of the accompanying software. 
+// If you use the software, you accept this license. 
+// If you do not accept the license, do not use the software.
+// http://go.microsoft.com/fwlink/?LinkID=131993
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -112,6 +115,7 @@ namespace Lithnet.SshMA
             try
             {
                 SshConnection.OpenSshConnection(configParameters);
+                SshConnection.CloseSshConnection();
             }
             catch (Exception ex)
             {

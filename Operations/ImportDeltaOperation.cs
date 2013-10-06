@@ -1,6 +1,9 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="ImportDeltaOperation.cs" company="Lithnet">
-// Copyright (c) 2013 Ryan Newington
+// The Microsoft Public License (Ms-PL) governs use of the accompanying software. 
+// If you use the software, you accept this license. 
+// If you do not accept the license, do not use the software.
+// http://go.microsoft.com/fwlink/?LinkID=131993
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -65,7 +68,7 @@ namespace Lithnet.SshMA
         /// Populates the object from its XML representation
         /// </summary>
         /// <param name="node">The Xml representation of the object</param>
-        protected override void FromXml(XmlNode node)
+        protected new void FromXml(XmlNode node)
         {
             XmlNode child = node.SelectSingleNode("import-mapping/modification-type-mappings");
 
@@ -126,7 +129,7 @@ namespace Lithnet.SshMA
                 this.ModificationTypeReplaceRegEx = modificationTypeReplaceNode.InnerText;
             }
 
-            XmlNode modificationTypeDeleteNode = child.SelectSingleNode("modification-type-replace");
+            XmlNode modificationTypeDeleteNode = child.SelectSingleNode("modification-type-delete");
 
             if (modificationTypeDeleteNode == null || string.IsNullOrWhiteSpace(modificationTypeDeleteNode.InnerText))
             {

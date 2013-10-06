@@ -1,6 +1,9 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="RuleBase.cs" company="Lithnet">
-// Copyright (c) 2013 Ryan Newington
+// The Microsoft Public License (Ms-PL) governs use of the accompanying software. 
+// If you use the software, you accept this license. 
+// If you do not accept the license, do not use the software.
+// http://go.microsoft.com/fwlink/?LinkID=131993
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -16,7 +19,7 @@ namespace Lithnet.SshMA
     /// <summary>
     /// An abstract base class used for the implementation of constructor rules
     /// </summary>
-    public abstract class RuleBase : IRule
+    public abstract class RuleBase : IEvaluableRuleObject
     {
         /// <summary>
         /// Initializes a new instance of the RuleBase class

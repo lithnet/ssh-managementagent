@@ -1,6 +1,9 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="CSEntryExport.cs" company="Lithnet">
-// Copyright (c) 2013 Ryan Newington
+// The Microsoft Public License (Ms-PL) governs use of the accompanying software. 
+// If you use the software, you accept this license. 
+// If you do not accept the license, do not use the software.
+// http://go.microsoft.com/fwlink/?LinkID=131993
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -48,10 +51,11 @@ namespace Lithnet.SshMA
                 case ObjectModificationType.Update:
                 case ObjectModificationType.Replace:
                     CSEntryExport.PerformCSEntryExportUpdate(csentry);
-                    
-                    if (HasDNChanged(csentry))
+                    string newDN = GetNewDN(csentry);
+
+                    if (newDN != null)
                     {
-                        anchorchanges.Add(AttributeChange.CreateAttributeReplace("entry-dn", csentry.DN));
+                        anchorchanges.Add(AttributeChange.CreateAttributeReplace("entry-dn", newDN));
                     }
 
                     break;
@@ -71,7 +75,7 @@ namespace Lithnet.SshMA
         /// </summary>
         /// <param name="csentry">The object to evaluate</param>
         /// <returns>A value indicating if the DN has changed</returns>
-        private static bool HasDNChanged(CSEntryChange csentry)
+        private static string GetNewDN(CSEntryChange csentry)
         {
             string dn;
 
@@ -81,16 +85,16 @@ namespace Lithnet.SshMA
             }
             catch (AttributeNotPresentException)
             {
-                return false;
+                return null;
             }
 
             if (dn != csentry.DN)
             {
                 Logger.WriteLine("The dn has changed. Old value '{0}'. New value '{1}'", csentry.DN, dn);
-                return true;
+                return dn;
             }
 
-            return false;
+            return null;
         }
 
         /// <summary>
@@ -169,9 +173,13 @@ namespace Lithnet.SshMA
             OperationBase operation = group.ObjectOperations.FirstOrDefault(t => t is ExportModifyOperation);
             OperationResult result = SshConnection.ExecuteOperation(operation, csentry);
 
-            if (result != null)
+            if (result != null && result.ExecutedCommands.Count > 0)
             {
                 Logger.WriteLine("ExportModify on object '{0}' returned: {1}", csentry.DN, result.ExecutedCommands.Last().Result);
+            }
+            else
+            {
+                Logger.WriteLine("ExportModify on object '{0}'. No commands were executed", csentry.DN);
             }
         }
     }

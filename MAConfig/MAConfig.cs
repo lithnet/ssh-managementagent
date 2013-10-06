@@ -1,6 +1,9 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="MAConfig.cs" company="Lithnet">
-// Copyright (c) 2013 Ryan Newington
+// The Microsoft Public License (Ms-PL) governs use of the accompanying software. 
+// If you use the software, you accept this license. 
+// If you do not accept the license, do not use the software.
+// http://go.microsoft.com/fwlink/?LinkID=131993
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -28,7 +31,7 @@ namespace Lithnet.SshMA
             MAConfig.OperationGroups = new ObjectOperationGroupKeyedCollection();
             MAConfig.GlobalOperations = new List<OperationBase>();
             MAConfig.Rules = new RuleKeyedCollection();
-            MAConfig.RuleHierarchy = new List<IRule>();
+            MAConfig.RuleHierarchy = new List<IEvaluableRuleObject>();
         }
         
         /// <summary>
@@ -54,7 +57,7 @@ namespace Lithnet.SshMA
         /// <summary>
         /// Gets a hierarchical representation of the rules
         /// </summary>
-        public static List<IRule> RuleHierarchy { get; private set; }
+        public static List<IEvaluableRuleObject> RuleHierarchy { get; private set; }
 
         /// <summary>
         /// Loads in the configuration settings from the specified XML file

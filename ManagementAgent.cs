@@ -1,6 +1,9 @@
 // -----------------------------------------------------------------------
 // <copyright file="ManagementAgent.cs" company="Lithnet">
-// Copyright (c) 2013 Ryan Newington
+// The Microsoft Public License (Ms-PL) governs use of the accompanying software. 
+// If you use the software, you accept this license. 
+// If you do not accept the license, do not use the software.
+// http://go.microsoft.com/fwlink/?LinkID=131993
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -246,7 +249,7 @@ namespace Lithnet.SshMA
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(MAParameterNames.Username, string.Empty, string.Empty));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateEncryptedStringParameter(MAParameterNames.PasswordOrPassphrase, string.Empty, string.Empty));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateDividerParameter());
-                    configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(MAParameterNames.LogPath, string.Empty, "%temp%\\lithnet.sshma.log"));
+                    configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(MAParameterNames.LogPath, string.Empty, string.Empty));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateCheckBoxParameter(MAParameterNames.DebugEnabled, false));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateCheckBoxParameter(MAParameterNames.LaunchDebuggerOnException, false));
                     break;
@@ -393,7 +396,7 @@ namespace Lithnet.SshMA
                     }
                 }
 
-                this.importEnumerator = CSEntryImport.GetObjects(this.schemaTypes).GetEnumerator();
+                this.importEnumerator = CSEntryImport.GetObjects(this.schemaTypes, importRunStep.ImportType).GetEnumerator();
             }
             catch (ExtensibleExtensionException)
             {
@@ -740,7 +743,7 @@ namespace Lithnet.SshMA
         {
             try
             {
-                PasswordChangeOperation operation = MAConfig.OperationGroups[csentry.ObjectClass[0].ToString()].ObjectOperations.FirstOrDefault(t => t is PasswordChangeOperation) as PasswordChangeOperation;
+                PasswordChangeOperation operation = MAConfig.OperationGroups[csentry.ObjectType.ToString()].ObjectOperations.FirstOrDefault(t => t is PasswordChangeOperation) as PasswordChangeOperation;
 
                 if (operation != null)
                 {
@@ -785,7 +788,7 @@ namespace Lithnet.SshMA
             try
             {
                 Logger.LogLevel = LogLevel.Debug;
-                PasswordSetOperation operation = MAConfig.OperationGroups[csentry.ObjectClass[0].ToString()].ObjectOperations.FirstOrDefault(t => t is PasswordSetOperation) as PasswordSetOperation;
+                PasswordSetOperation operation = MAConfig.OperationGroups[csentry.ObjectType].ObjectOperations.FirstOrDefault(t => t is PasswordSetOperation) as PasswordSetOperation;
 
                 if (operation != null)
                 {
@@ -843,7 +846,7 @@ namespace Lithnet.SshMA
             }
             else
             {
-                Logger.WriteLine(string.Format("An unexpected exception occured for csentry attributeChange {0} with DN {1}", csentryChange.Identifier.ToString(), csentryChange.DN ?? string.Empty));
+                Logger.WriteLine(string.Format("An unexpected exception occured for csentry {0} with DN {1}", csentryChange.Identifier.ToString(), csentryChange.DN ?? string.Empty));
                 Logger.WriteException(ex);
                 return CSEntryChangeResult.Create(csentryChange.Identifier, null, MAExportError.ExportErrorCustomContinueRun, ex.Message, ex.StackTrace);
             }
