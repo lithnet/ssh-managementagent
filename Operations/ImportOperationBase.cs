@@ -1,6 +1,9 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="ImportOperationBase.cs" company="Lithnet">
-// Copyright (c) 2013 Ryan Newington
+// The Microsoft Public License (Ms-PL) governs use of the accompanying software. 
+// If you use the software, you accept this license. 
+// If you do not accept the license, do not use the software.
+// http://go.microsoft.com/fwlink/?LinkID=131993
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -24,9 +27,7 @@ namespace Lithnet.SshMA
         public ImportOperationBase()
             : base()
         {
-            this.MultiValuedAttributeMappings = new List<MultiValueExtract>();
-            this.Filters = new List<ObjectFilter>();
-            this.AttributeTransformations = new List<AttributeTransformation>();
+            this.Initialize();
         }
 
         /// <summary>
@@ -34,8 +35,9 @@ namespace Lithnet.SshMA
         /// </summary>
         /// <param name="node">The Xml representation of the object</param>
         public ImportOperationBase(XmlNode node)
-            : this()
+            : base(node)
         {
+            this.Initialize();
             this.FromXml(node);
         }
 
@@ -73,10 +75,8 @@ namespace Lithnet.SshMA
         /// Populates the object from its XML representation
         /// </summary>
         /// <param name="node">The Xml representation of the object</param>
-        protected override void FromXml(XmlNode node)
+        protected new void FromXml(XmlNode node)
         {
-            base.FromXml(node);
-            
             XmlNode child = node.SelectSingleNode("import-mapping/object-extract");
 
             if (child == null || string.IsNullOrWhiteSpace(child.InnerText))
@@ -113,6 +113,16 @@ namespace Lithnet.SshMA
             {
                 throw new ArgumentException("At least one import command must provide result objects by setting the 'result-has-objects' attribute to 'true'");
             }
+        }
+
+        /// <summary>
+        /// Initializes the base members of the class
+        /// </summary>
+        private void Initialize()
+        {
+            this.MultiValuedAttributeMappings = new List<MultiValueExtract>();
+            this.Filters = new List<ObjectFilter>();
+            this.AttributeTransformations = new List<AttributeTransformation>();
         }
     }
 }

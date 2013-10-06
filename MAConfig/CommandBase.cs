@@ -1,6 +1,9 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="CommandBase.cs" company="Lithnet">
-// Copyright (c) 2013 Ryan Newington
+// The Microsoft Public License (Ms-PL) governs use of the accompanying software. 
+// If you use the software, you accept this license. 
+// If you do not accept the license, do not use the software.
+// http://go.microsoft.com/fwlink/?LinkID=131993
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -38,7 +41,7 @@ namespace Lithnet.SshMA
         /// <summary>
         /// Gets the rule or rules that apply to this command
         /// </summary>
-        public IRule RuleSet { get; private set; }
+        public IEvaluableRuleObject RuleSet { get; private set; }
 
         /// <summary>
         /// Evaluates the rule sets that apply to this command to determine if it should be executed

@@ -125,7 +125,7 @@
     <Compile Include="Rules\AttributeChangeRule.cs" />
     <Compile Include="Rules\AttributePresenceRule.cs" />
     <Compile Include="MAConfig\ObjectOperationGroup.cs" />
-    <Compile Include="Rules\IRule.cs" />
+    <Compile Include="Rules\IEvaluableRuleObject.cs" />
     <Compile Include="Rules\MultiValuedAttributeValueRule.cs" />
     <Compile Include="Rules\ObjectChangeRule.cs" />
     <Compile Include="Rules\RuleBase.cs" />
@@ -151,6 +151,8 @@
     <Compile Include="Enums\ValueOperator.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="changelog.txt" />
+    <Content Include="ConfigurationFiles\Kerberos\kerberos.xml" />
     <Content Include="ConfigurationFiles\Solaris9\solaris9.xml" />
     <Content Include="Lithnet.Logging.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -163,6 +165,16 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <None Include="ConfigurationFiles\Solaris9\HelperScripts\group-scripts\add_member.py" />
+    <None Include="ConfigurationFiles\Solaris9\HelperScripts\group-scripts\get_groups.py" />
+    <None Include="ConfigurationFiles\Solaris9\HelperScripts\group-scripts\group" />
+    <None Include="ConfigurationFiles\Solaris9\HelperScripts\group-scripts\groups.py" />
+    <None Include="ConfigurationFiles\Solaris9\HelperScripts\group-scripts\remove_member.py" />
+    <None Include="ConfigurationFiles\Solaris9\HelperScripts\group-scripts\remove_members.py" />
+    <None Include="ConfigurationFiles\Solaris9\HelperScripts\group-scripts\settings.py" />
+    <None Include="ConfigurationFiles\Solaris9\HelperScripts\group-scripts\test.py" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent />

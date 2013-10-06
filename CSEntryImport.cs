@@ -1,6 +1,9 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="CSEntryImport.cs" company="Lithnet">
-// Copyright (c) 2013 Ryan Newington
+// The Microsoft Public License (Ms-PL) governs use of the accompanying software. 
+// If you use the software, you accept this license. 
+// If you do not accept the license, do not use the software.
+// http://go.microsoft.com/fwlink/?LinkID=131993
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -24,14 +27,23 @@ namespace Lithnet.SshMA
         /// Gets the objects required for import
         /// </summary>
         /// <param name="schemaTypes">The object classes to import</param>
+        /// <param name="operationType">The type of import operation</param>
         /// <returns>A list of CSEntryChange objects</returns>
-        public static IEnumerable<CSEntryChange> GetObjects(KeyedCollection<string, SchemaType> schemaTypes)
+        public static IEnumerable<CSEntryChange> GetObjects(KeyedCollection<string, SchemaType> schemaTypes, OperationType operationType)
         {
             List<CSEntryChange> csentries = new List<CSEntryChange>();
-            
+
             foreach (ObjectOperationGroup group in MAConfig.OperationGroups.Where(t => schemaTypes.Contains(t.ObjectClass)))
             {
-                OperationBase operation = group.ObjectOperations.FirstOrDefault(t => t is ImportFullOperation);
+                OperationBase operation;
+                if (operationType == OperationType.Delta)
+                {
+                    operation = group.ObjectOperations.FirstOrDefault(t => t is ImportDeltaOperation);
+                }
+                else
+                {
+                    operation = group.ObjectOperations.FirstOrDefault(t => t is ImportFullOperation);
+                }
 
                 if (operation == null)
                 {
@@ -54,10 +66,10 @@ namespace Lithnet.SshMA
         public static IEnumerable<CSEntryChange> GetCSEntryChanges(OperationResult result, SchemaType schemaType)
         {
             ImportOperationBase operation = result.ExecutedOperation as ImportOperationBase;
-                        
+
             if (result.ExecutedCommandsWithObjects.Count == 0)
             {
-                throw new FailedSearchException("No search results were returned");
+                throw new FailedSearchException("No commands were executed that contained import results");
             }
 
             foreach (SshCommand command in result.ExecutedCommandsWithObjects)
@@ -67,14 +79,39 @@ namespace Lithnet.SshMA
                 foreach (Match match in matchCollection)
                 {
                     CSEntryChange csentry = CSEntryChange.Create();
-                    csentry.ObjectModificationType = GetObjectChangeTypeFromMatchCollection(matchCollection, operation);
+                    ObjectModificationType modifcationType = GetObjectChangeTypeFromMatchCollection(match, operation);
+
+                    if (modifcationType == ObjectModificationType.None)
+                    {
+                        Logger.WriteLine("Discarding object due to invalid modification type: " + match.Value);
+                        continue;
+                    }
+                    else
+                    {
+                        csentry.ObjectModificationType = modifcationType;
+                    }
+
                     csentry.ObjectType = schemaType.Name;
 
-                    PopulateCSEntryWithMatches(schemaType, operation, match, csentry);
+                    if (modifcationType == ObjectModificationType.Delete)
+                    {
+                        // We need to create a temporary CSEntryChange here because a CSEntryChange with an
+                        // object modification type of 'delete' cannot contain attribute changes
+                        // This stops us from being able to construct a DN for the CSEntryChange
+                        CSEntryChange temporaryChange = CSEntryChange.Create();
+                        temporaryChange.ObjectModificationType = ObjectModificationType.Update;
+                        temporaryChange.ObjectType = csentry.ObjectType;
+                        PopulateCSEntryWithMatches(schemaType, operation, match, temporaryChange);
+                        csentry.DN = MASchema.Objects[schemaType.Name].DNFormat.ExpandDeclaration(temporaryChange, true);
+                        csentry.AnchorAttributes.Add(AnchorAttribute.Create("entry-dn", csentry.DN));
+                    }
+                    else
+                    {
+                        PopulateCSEntryWithMatches(schemaType, operation, match, csentry);
+                        csentry.DN = MASchema.Objects[schemaType.Name].DNFormat.ExpandDeclaration(csentry, true);
+                        csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd("entry-dn", csentry.DN));
+                    }
 
-                    csentry.DN = MASchema.Objects[schemaType.Name].DNFormat.ExpandDeclaration(csentry, true);
-                    csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd("entry-dn", csentry.DN));
-                    
                     if (string.IsNullOrEmpty(csentry.DN))
                     {
                         Logger.WriteLine("Discarding object from result as no DN could be derived: " + match.Value, LogLevel.Debug);
@@ -160,7 +197,7 @@ namespace Lithnet.SshMA
 
             return newValues;
         }
-        
+
         /// <summary>
         /// Gets a list of attribute values from a regular expression match
         /// </summary>
@@ -219,10 +256,10 @@ namespace Lithnet.SshMA
         /// <summary>
         /// Gets the object modification type from a regular expression match collection
         /// </summary>
-        /// <param name="matchCollection">The collection of matches containing the change type</param>
+        /// <param name="match">The match containing the delta object entry</param>
         /// <param name="operation">The operation being performed</param>
         /// <returns>An object modification type value</returns>
-        private static ObjectModificationType GetObjectChangeTypeFromMatchCollection(MatchCollection matchCollection, ImportOperationBase operation)
+        private static ObjectModificationType GetObjectChangeTypeFromMatchCollection(Match match, ImportOperationBase operation)
         {
             if (operation is ImportFullOperation)
             {
@@ -231,27 +268,24 @@ namespace Lithnet.SshMA
 
             ImportDeltaOperation deltaOperation = operation as ImportDeltaOperation;
 
-            foreach (Match match in matchCollection)
+            Group group = match.Groups[deltaOperation.ChangeTypeCaptureGroupName];
+
+            if (!group.Success)
             {
-                Group group = match.Groups[deltaOperation.ChangeTypeCaptureGroupName];
+                throw new ArgumentException("Capture group for change type not found");
+            }
 
-                if (!group.Success)
-                {
-                    continue;
-                }
-
-                if (Regex.IsMatch(group.Value, deltaOperation.ModificationTypeAddRegEx))
-                {
-                    return ObjectModificationType.Add;
-                }
-                else if (Regex.IsMatch(group.Value, deltaOperation.ModificationTypeReplaceRegEx))
-                {
-                    return ObjectModificationType.Replace;
-                }
-                else if (Regex.IsMatch(group.Value, deltaOperation.ModificationTypeDeleteRegEx))
-                {
-                    return ObjectModificationType.Delete;
-                }
+            if (Regex.IsMatch(group.Value, deltaOperation.ModificationTypeAddRegEx))
+            {
+                return ObjectModificationType.Add;
+            }
+            else if (Regex.IsMatch(group.Value, deltaOperation.ModificationTypeReplaceRegEx))
+            {
+                return ObjectModificationType.Replace;
+            }
+            else if (Regex.IsMatch(group.Value, deltaOperation.ModificationTypeDeleteRegEx))
+            {
+                return ObjectModificationType.Delete;
             }
 
             if (deltaOperation.UnexpectedModTypeAction == UnexpectedModificationTypeAction.Ignore)

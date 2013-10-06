@@ -1,6 +1,9 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="RuleGroup.cs" company="Lithnet">
-// Copyright (c) 2013 Ryan Newington
+// The Microsoft Public License (Ms-PL) governs use of the accompanying software. 
+// If you use the software, you accept this license. 
+// If you do not accept the license, do not use the software.
+// http://go.microsoft.com/fwlink/?LinkID=131993
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -16,7 +19,7 @@ namespace Lithnet.SshMA
     /// <summary>
     /// Represents a group of rules
     /// </summary>
-    public class RuleGroup : IRule
+    public class RuleGroup : IEvaluableRuleObject
     {
         /// <summary>
         /// The XML representation of this object
@@ -156,7 +159,7 @@ namespace Lithnet.SshMA
                         continue;
                     }
 
-                    IRule rule = MAConfig.Rules[ruleIdAttribute.Value];
+                    IEvaluableRuleObject rule = MAConfig.Rules[ruleIdAttribute.Value];
 
                     if (rule is RuleBase)
                     {

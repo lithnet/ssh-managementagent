@@ -128,10 +128,10 @@
   <object-operations object-class="group">
     <object-operation xsi:type="sshma:object-operation-ImportFull">
       <commands>
-        <command result-has-objects="true">cat /etc/group</command>
+        <command result-has-objects="true">/home/svc-fim/prod/get_groups.py</command>
       </commands>
       <import-mapping>
-        <object-extract><![CDATA[^(?<accountName>.+)?:\*?:(?<gid>.+)?:(?<members>.+)?$]]></object-extract>
+        <object-extract><![CDATA[^(?<accountName>.+)?:(?<gid>.+)?:(?<members>.+)?$]]></object-extract>
         <multivalue-extracts>
           <multivalue-extract capture-group-name="members" attribute="member"><![CDATA[[\w\d- ]+]]></multivalue-extract>
         </multivalue-extracts>
@@ -147,16 +147,16 @@
     <object-operation xsi:type="sshma:object-operation-ExportAdd">
       <commands>
         <command>/usr/local/bin/sudo /usr/sbin/groupadd -g {gid} {dn:$1}</command>
-        <command xsi:type="sshma:mv-command" for-each="member">echo addmember:{member:$1}</command>
+        <command xsi:type="sshma:mv-command" for-each="member">/home/svc-fim/prod/add_member.py {dn:$1} {member:$1}</command>
       </commands>
     </object-operation>
 
     <object-operation xsi:type="sshma:object-operation-ExportModify">
       <commands>
         <command rule-id="groupGidOrAccountNameHasChanged">/usr/local/bin/sudo /usr/sbin/groupmod [-g {gid} ][-n {accountName} ]{dn:$1}</command>
-        <command xsi:type="sshma:mv-command" rule-id="groupMemberModified" for-each="member" value-modification="add">echo addmember:{member:$1} {dn:$1}</command>
-        <command xsi:type="sshma:mv-command" rule-id="groupMemberModified" for-each="member" value-modification="delete">echo deletemember:{member:$1} {dn:$1}</command>
-        <command rule-id="groupMembersDeleted">echo deleteallmembers {dn:$1}</command>
+        <command xsi:type="sshma:mv-command" rule-id="groupMemberModified" for-each="member" value-modification="add">/home/svc-fim/prod/add_member.py {dn:$1} {member:$1}</command>
+        <command xsi:type="sshma:mv-command" rule-id="groupMemberModified" for-each="member" value-modification="delete">/home/svc-fim/prod/remove_member.py {dn:$1} {member:$1}</command>
+        <command rule-id="groupMembersDeleted">/home/svc-fim/prod/remove_members.py {dn:$1}</command>
       </commands>
     </object-operation>
 

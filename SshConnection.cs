@@ -1,6 +1,9 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="SshConnection.cs" company="Lithnet">
-// Copyright (c) 2013 Ryan Newington
+// The Microsoft Public License (Ms-PL) governs use of the accompanying software. 
+// If you use the software, you accept this license. 
+// If you do not accept the license, do not use the software.
+// http://go.microsoft.com/fwlink/?LinkID=131993
 // </copyright>
 // -----------------------------------------------------------------------
 
@@ -9,6 +12,7 @@ namespace Lithnet.SshMA
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.IO;
     using System.Linq;
     using System.Runtime.InteropServices;
     using System.Security;
@@ -292,12 +296,12 @@ namespace Lithnet.SshMA
                                 {
                                     System.Diagnostics.Debug.WriteLine(s);
                                     output += s;
-                                    shell.WriteLine(expectCommand.Command.ExpandDeclaration(csentry, false));
+                                    shell.Write(expectCommand.Command.ExpandDeclaration(csentry, false) + "\n");
                                 }));
                     }
                     else
                     {
-                        shell.WriteLine(sendCommand.Command.ExpandDeclaration(csentry, false));
+                        shell.Write(sendCommand.Command.ExpandDeclaration(csentry, false) + "\n");
                     }
                 }
 
@@ -308,7 +312,7 @@ namespace Lithnet.SshMA
                         TimeSpan timeout = new TimeSpan(0, 0, command.ExpectSuccess.Timeout);
                         if (shell.Expect(command.ExpectSuccess.Expect.ExpandDeclaration(csentry, false), timeout) == null)
                         {
-                            throw new Microsoft.MetadirectoryServices.ExtensibleExtensionException("The asynchronous command did not return the expected result");
+                            throw new ExtensibleExtensionException("The asynchronous command did not return the expected result");
                         }
                     }
                 }
@@ -355,7 +359,7 @@ namespace Lithnet.SshMA
                                     expectedArrived = true;
                                     System.Diagnostics.Debug.WriteLine(s);
                                     output += s;
-                                    shell.WriteLine(expectCommand.Command.ExpandDeclaration(csentry, oldPassword, newPassword, false));
+                                    shell.Write(expectCommand.Command.ExpandDeclaration(csentry, oldPassword, newPassword, false) + "\n");
                                 }));
 
                         if (!expectedArrived)
@@ -366,7 +370,7 @@ namespace Lithnet.SshMA
                     }
                     else
                     {
-                        shell.WriteLine(sendCommand.Command.ExpandDeclaration(csentry, oldPassword, newPassword, false));
+                        shell.Write(sendCommand.Command.ExpandDeclaration(csentry, oldPassword, newPassword, false) + "\n");
                     }
                 }
 
@@ -394,7 +398,7 @@ namespace Lithnet.SshMA
                 Logger.WriteLine(output, LogLevel.Debug);
             }
         }
-
+        
         /// <summary>
         /// Gets a PrivateKeyFile object from the path specified in the configuration parameters
         /// </summary>
@@ -406,12 +410,15 @@ namespace Lithnet.SshMA
 
             if (!config.Contains(MAParameterNames.PasswordOrPassphrase))
             {
-                file = new PrivateKeyFile(config[MAParameterNames.PrivateKeyFile].Value);
+                FileStream stream = new FileStream(config[MAParameterNames.PrivateKeyFile].Value, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                file = new PrivateKeyFile(
+                    stream);
             }
             else
             {
+                FileStream stream = new FileStream(config[MAParameterNames.PrivateKeyFile].Value, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                 file = new PrivateKeyFile(
-                    config[MAParameterNames.PrivateKeyFile].Value,
+                    stream,
                     GetPassword(config));
             }
 
