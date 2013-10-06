@@ -1,4 +1,5 @@
-﻿- Fixed a bug in the parameter validation that left the SSH connection open, causing the AppDomain to hang on unloading, which caused the FIM Sync Service UI to hang when creating a new MA.
+﻿7/10/2013	1.0.5025
+- Fixed a bug in the parameter validation that left the SSH connection open, causing the AppDomain to hang on unloading, which caused the FIM Sync Service UI to hang when creating a new MA.
 - Enabled full support for delta imports
 - Fixed an issue with class inheritance between ImportOperationBase and OperationBase
 - Added Kerberos configuration file
