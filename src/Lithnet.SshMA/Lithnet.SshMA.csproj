@@ -1,0 +1,186 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A645C9ED-6F86-44C9-A8A7-A9DA013B81DC}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ApplicationIcon />
+    <AssemblyKeyContainerName />
+    <AssemblyName>Lithnet.SshMA</AssemblyName>
+    <AssemblyOriginatorKeyFile />
+    <AssemblyOriginatorKeyMode>None</AssemblyOriginatorKeyMode>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>Library</OutputType>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionStrict>Off</OptionStrict>
+    <RootNamespace>Lithnet.SshMA</RootNamespace>
+    <StartupObject />
+    <FileUpgradeFlags />
+    <MyType>Windows</MyType>
+    <UpgradeBackupLocation />
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>C:\Program Files\Microsoft Forefront Identity Manager\2010\Synchronization Service\Extensions</OutputPath>
+    <DocumentationFile />
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile />
+    <DefineConstants />
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <NoWarn />
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>C:\Program Files\Microsoft Forefront Identity Manager\2010\Synchronization Service\Extensions</OutputPath>
+    <DocumentationFile />
+    <BaseAddress>285212672</BaseAddress>
+    <ConfigurationOverrideFile />
+    <DefineConstants />
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <NoWarn />
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Lithnet.Logging, Version=1.0.5774.20685, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Lithnet.Logging.1.0.5774.20685\lib\net40\Lithnet.Logging.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.MetadirectoryServicesEx">
+      <HintPath>C:\Program Files\Microsoft Forefront Identity Manager\2010\Synchronization Service\Bin\Assemblies\Microsoft.MetadirectoryServicesEx.dll</HintPath>
+    </Reference>
+    <Reference Include="Renci.SshNet, Version=2013.4.7.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SSH.NET.2013.4.7\lib\net40\Renci.SshNet.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Management" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ComparisonEngine.cs" />
+    <Compile Include="MAConfig\AsyncCommand.cs" />
+    <Compile Include="MAConfig\AttributeTransformation.cs" />
+    <Compile Include="MAConfig\SshMACapabilities.cs" />
+    <Compile Include="MAConfig\MultiValueExtract.cs" />
+    <Compile Include="MAConfig\SyncCommand.cs" />
+    <Compile Include="MAConfig\CommandBase.cs" />
+    <Compile Include="MAConfig\AsyncCommandSendExpect.cs" />
+    <Compile Include="MAConfig\MAConfig.cs" />
+    <Compile Include="MAConfig\ValueDeclaration.cs" />
+    <Compile Include="MAConfig\ObjectOperationGroupKeyedCollection.cs" />
+    <Compile Include="MAConfig\ObjectFilter.cs" />
+    <Compile Include="MAConfig\ReferencedAttribute.cs" />
+    <Compile Include="MAConfig\AsyncCommandSend.cs" />
+    <Compile Include="Enums\MultiValueCondition.cs" />
+    <Compile Include="Enums\PresenceOperator.cs" />
+    <Compile Include="Enums\TriggerEvents.cs" />
+    <Compile Include="Enums\UnexpectedModificationTypeAction.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="MAParameterValidator.cs" />
+    <Compile Include="OperationResult.cs" />
+    <Compile Include="Operations\ImportDeltaOperation.cs" />
+    <Compile Include="Operations\ImportOperationBase.cs" />
+    <Compile Include="Operations\PasswordChangeOperation.cs" />
+    <Compile Include="Operations\ImportDeltaStartOperation.cs" />
+    <Compile Include="Operations\ImportDeltaEndOperation.cs" />
+    <Compile Include="Operations\ExportAddOperation.cs" />
+    <Compile Include="Operations\ExportDeleteOperation.cs" />
+    <Compile Include="Operations\ExportEndOperation.cs" />
+    <Compile Include="Operations\ExportModifyOperation.cs" />
+    <Compile Include="Operations\ExportStartOperation.cs" />
+    <Compile Include="Operations\ImportFullEndOperation.cs" />
+    <Compile Include="Operations\ImportFullOperation.cs" />
+    <Compile Include="Operations\ImportFullStartOperation.cs" />
+    <Compile Include="Operations\OperationBase.cs" />
+    <Compile Include="Rules\AttributeChangeRule.cs" />
+    <Compile Include="Rules\AttributePresenceRule.cs" />
+    <Compile Include="MAConfig\ObjectOperationGroup.cs" />
+    <Compile Include="Rules\IEvaluableRuleObject.cs" />
+    <Compile Include="Rules\MultiValuedAttributeValueRule.cs" />
+    <Compile Include="Rules\ObjectChangeRule.cs" />
+    <Compile Include="Rules\RuleBase.cs" />
+    <Compile Include="Rules\RuleKeyedCollection.cs" />
+    <Compile Include="Rules\RuleGroup.cs" />
+    <Compile Include="Enums\RuleGroupOperator.cs" />
+    <Compile Include="CSEntryExport.cs" />
+    <Compile Include="CSEntryImport.cs" />
+    <Compile Include="ManagementAgent.cs" />
+    <Compile Include="MAParameterNames.cs" />
+    <Compile Include="Exceptions\ReferencedObjectNotPresentException.cs" />
+    <Compile Include="Operations\PasswordStartOperation.cs" />
+    <Compile Include="Operations\PasswordEndOperation.cs" />
+    <Compile Include="Operations\PasswordSetOperation.cs" />
+    <Compile Include="Rules\SingleValuedAttributeValueRule.cs" />
+    <Compile Include="Schema\MASchema.cs" />
+    <Compile Include="Schema\MASchemaAttribute.cs" />
+    <Compile Include="Schema\MASchemaAttributes.cs" />
+    <Compile Include="Schema\MASchemaObject.cs" />
+    <Compile Include="Schema\MASchemaObjects.cs" />
+    <Compile Include="Schema\XmlSchema.cs" />
+    <Compile Include="SshConnection.cs" />
+    <Compile Include="Enums\ValueOperator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="changelog.txt" />
+    <Content Include="ConfigurationFiles\Kerberos\kerberos.xml" />
+    <Content Include="ConfigurationFiles\Solaris9\solaris9.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="MAConfig\Lithnet.SSHMA.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="ConfigurationFiles\Solaris9\HelperScripts\group-scripts\add_member.py" />
+    <None Include="ConfigurationFiles\Solaris9\HelperScripts\group-scripts\get_groups.py" />
+    <None Include="ConfigurationFiles\Solaris9\HelperScripts\group-scripts\group" />
+    <None Include="ConfigurationFiles\Solaris9\HelperScripts\group-scripts\groups.py" />
+    <None Include="ConfigurationFiles\Solaris9\HelperScripts\group-scripts\remove_member.py" />
+    <None Include="ConfigurationFiles\Solaris9\HelperScripts\group-scripts\remove_members.py" />
+    <None Include="ConfigurationFiles\Solaris9\HelperScripts\group-scripts\settings.py" />
+    <None Include="ConfigurationFiles\Solaris9\HelperScripts\group-scripts\test.py" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent />
+    <PostBuildEvent />
+  </PropertyGroup>
+</Project>

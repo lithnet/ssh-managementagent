@@ -1,8 +1,0 @@
-﻿7/10/2013	1.0.5025
-- Fixed a bug in the parameter validation that left the SSH connection open, causing the AppDomain to hang on unloading, which caused the FIM Sync Service UI to hang when creating a new MA.
-- Enabled full support for delta imports
-- Fixed an issue with class inheritance between ImportOperationBase and OperationBase
-- Added Kerberos configuration file
-- Fixed an issue where an anchor change was not being provided to FIM on export
-- Fixed an issue where the same key file used by multiple MA could get locked if read open at the same time
-- Fixed an issue using asynchronous commands where windows CRLF commands caused a double line feed to occur on some unix systems

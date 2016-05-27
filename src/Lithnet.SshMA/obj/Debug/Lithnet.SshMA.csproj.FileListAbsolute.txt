@@ -1,0 +1,5 @@
+C:\Program Files\Microsoft Forefront Identity Manager\2010\Synchronization Service\Extensions\Lithnet.SshMA.dll
+C:\Program Files\Microsoft Forefront Identity Manager\2010\Synchronization Service\Extensions\Lithnet.SshMA.pdb
+D:\github\lithnet\ssh-managementagent\src\Lithnet.SshMA\obj\Debug\Lithnet.SshMA.csprojResolveAssemblyReference.cache
+D:\github\lithnet\ssh-managementagent\src\Lithnet.SshMA\obj\Debug\Lithnet.SshMA.dll
+D:\github\lithnet\ssh-managementagent\src\Lithnet.SshMA\obj\Debug\Lithnet.SshMA.pdb
