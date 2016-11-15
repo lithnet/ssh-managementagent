@@ -121,8 +121,9 @@ namespace Lithnet.SshMA
         /// </summary>
         /// <param name="csentry">The source object</param>
         /// <param name="throwOnMissingAttribute">Sets a value indicating whether an exception should be thrown if an attribute is not present in the CSEntryChange, otherwise replaces the declaration with an empty string</param>
+        /// <param name="obfuscatePasswordFields">A value indicating if passwords should be obfuscated in the resulting output. Typically used for logging purposes</param>
         /// <returns>The DeclarationText value with all references to attributes replaced with their actual values</returns>
-        public string ExpandDeclaration(CSEntryChange csentry, bool throwOnMissingAttribute)
+        public string ExpandDeclaration(CSEntryChange csentry, bool throwOnMissingAttribute, bool obfuscatePasswordFields)
         {
             if (csentry == null)
             {
@@ -133,7 +134,7 @@ namespace Lithnet.SshMA
 
             foreach (ReferencedAttribute attribute in this.AttributeReferences)
             {
-                constructedValue = constructedValue.Replace(attribute.Declaration, this.GetSourceAttributeValue(csentry, attribute, throwOnMissingAttribute) ?? string.Empty);
+                constructedValue = constructedValue.Replace(attribute.Declaration, this.GetSourceAttributeValue(csentry, attribute, throwOnMissingAttribute, obfuscatePasswordFields) ?? string.Empty);
             }
 
             return constructedValue;
@@ -163,7 +164,7 @@ namespace Lithnet.SshMA
                 }
                 else
                 {
-                    constructedValue = constructedValue.Replace(reference.Declaration, this.GetSourceAttributeValue(csentry, reference, false) ?? string.Empty);
+                    constructedValue = constructedValue.Replace(reference.Declaration, this.GetSourceAttributeValue(csentry, reference, false, false) ?? string.Empty);
                 }
             }
 
@@ -192,8 +193,9 @@ namespace Lithnet.SshMA
         /// <param name="csentry">The source object</param>
         /// <param name="reference">The ReferencedAttribute to obtain the value for</param>
         /// <param name="throwOnMissingAttribute">Sets a value indicating whether an exception should be thrown if an attribute is not present in the CSEntryChange, otherwise replaces the declaration with an empty string</param>
+        /// <param name="obfuscatePasswordFields">A value indicating if passwords should be obfuscated in the resulting output. Typically used for logging purposes</param>
         /// <returns>The value of the specified reference on the source object</returns>
-        private string GetSourceAttributeValue(CSEntryChange csentry, ReferencedAttribute reference, bool throwOnMissingAttribute)
+        private string GetSourceAttributeValue(CSEntryChange csentry, ReferencedAttribute reference, bool throwOnMissingAttribute, bool obfuscatePasswordFields)
         {
             string sourceAttributeValue = string.Empty;
 
@@ -201,7 +203,7 @@ namespace Lithnet.SshMA
             {
                 return this.GetReferencedDNComponent(csentry, reference);
             }
-            
+
             if (csentry.AttributeChanges.Contains(reference.AttributeName))
             {
                 ValueChange valueChange = csentry.AttributeChanges[reference.AttributeName].ValueChanges.FirstOrDefault(t => t.ModificationType == ValueModificationType.Add);
@@ -209,6 +211,24 @@ namespace Lithnet.SshMA
                 if (valueChange != null)
                 {
                     sourceAttributeValue = reference.PreReferenceString + valueChange.Value.ToString() + reference.PostReferenceString;
+                }
+            }
+            else if (reference.AttributeName.StartsWith("sshma"))
+            {
+                switch (reference.AttributeName)
+                {
+                    case "sshma:username":
+                        return ManagementAgent.MAParameters.Username;
+
+                    case "sshma:password":
+                        if (obfuscatePasswordFields)
+                        {
+                            return "#hiddenpassword#";
+                        }
+                        else
+                        {
+                            return ManagementAgent.MAParameters.GetPassword();
+                        }
                 }
             }
             else
@@ -308,7 +328,7 @@ namespace Lithnet.SshMA
 
             return valueToInsert;
         }
-        
+
         /// <summary>
         /// Extracts the reference declarations referenced in the specified text
         /// </summary>
@@ -317,7 +337,7 @@ namespace Lithnet.SshMA
         {
             this.AttributeReferences.Clear();
 
-            Regex regex = new Regex(@"\[(?<preText>[^\]\[]*?)\{((?<referenceAttributeName>\w+)->)?(?<attributeName>\w+)(\:(?<modifier>([^\d]))?(?<count>\d?))?\}(?<postText>.*?)\]|\{((?<referenceAttributeName>\w+)->)?(?<attributeName>\w+)(\:(?<modifier>([^\d]))?(?<count>\d?))?\}", RegexOptions.ExplicitCapture);
+            Regex regex = new Regex(@"\[(?<preText>[^\]\[]*?)\{((?<referenceAttributeName>\w+)->)?(?<attributeName>\w+)(\:(?<modifier>([^\d]))?(?<count>\d?))?\}(?<postText>.*?)\]|\{((?<referenceAttributeName>\w+)->)?(?<attributeName>(sshma\:)?\w+)(\:(?<modifier>([^\d]))?(?<count>\d?))?\}", RegexOptions.ExplicitCapture);
             MatchCollection matches = regex.Matches(value);
 
             foreach (Match match in matches)

@@ -35,21 +35,21 @@ namespace Lithnet.SshMA
         /// Opens a connection to the SSH server
         /// </summary>
         /// <param name="config">The configuration parameters to use for the operation</param>
-        public static void OpenSshConnection(KeyedCollection<string, ConfigParameter> config)
+        public static void OpenSshConnection(MAParameters config)
         {
-            if (config[MAParameterNames.AuthenticationMode].Value == "Username/Password")
+            if (config.AuthenticationMode == "Username/Password")
             {
                 client = new SshClient(
-                    config[MAParameterNames.HostName].Value, 
-                    config[MAParameterNames.Username].Value,
-                    GetPassword(config));
+                    config.HostName,
+                    config.Username,
+                    config.GetPassword());
             }
             else
             {
-                PrivateKeyFile file = GetPrivateKeyFile(config);
+                PrivateKeyFile file = config.GetPrivateKeyFile();
                 client = new SshClient(
-                    config[MAParameterNames.HostName].Value, 
-                    config[MAParameterNames.Username].Value, 
+                    config.HostName,
+                    config.Username,
                     file);
             }
 
@@ -57,7 +57,7 @@ namespace Lithnet.SshMA
 
             Logger.WriteLine("Connected to {0} as {1}", client.ConnectionInfo.Host, client.ConnectionInfo.Username);
         }
-        
+
         /// <summary>
         /// Closes the SSH connection
         /// </summary>
@@ -112,7 +112,7 @@ namespace Lithnet.SshMA
 
             return result;
         }
-  
+
         /// <summary>
         /// Executes the specified operation against the SSH client
         /// </summary>
@@ -175,7 +175,7 @@ namespace Lithnet.SshMA
 
             return result;
         }
-        
+
         /// <summary>
         /// Executes a synchronous command
         /// </summary>
@@ -186,9 +186,10 @@ namespace Lithnet.SshMA
         {
             if (command.ForEachAttribute == null)
             {
-                string commandText = command.Command.ExpandDeclaration(csentry, false);
+                string commandText = command.Command.ExpandDeclaration(csentry, false, false);
+                string logText = command.Command.ExpandDeclaration(csentry, false, true);
                 SshCommand sshCommand = client.CreateCommand(commandText);
-                Logger.WriteLine("Executing command: " + commandText);
+                Logger.WriteLine("Executing command: " + logText);
                 ExecuteSyncCommand(result, command, sshCommand);
             }
             else
@@ -285,7 +286,7 @@ namespace Lithnet.SshMA
                     if (sendCommand is AsyncCommandSendExpect)
                     {
                         AsyncCommandSendExpect expectCommand = sendCommand as AsyncCommandSendExpect;
-                        string expectText = expectCommand.Expect.ExpandDeclaration(csentry, false);
+                        string expectText = expectCommand.Expect.ExpandDeclaration(csentry, false, false);
                         TimeSpan timeout = new TimeSpan(0, 0, expectCommand.Timeout);
 
                         shell.Expect(
@@ -296,12 +297,12 @@ namespace Lithnet.SshMA
                                 {
                                     System.Diagnostics.Debug.WriteLine(s);
                                     output += s;
-                                    shell.Write(expectCommand.Command.ExpandDeclaration(csentry, false) + "\n");
+                                    shell.Write(expectCommand.Command.ExpandDeclaration(csentry, false, false) + "\n");
                                 }));
                     }
                     else
                     {
-                        shell.Write(sendCommand.Command.ExpandDeclaration(csentry, false) + "\n");
+                        shell.Write(sendCommand.Command.ExpandDeclaration(csentry, false, false) + "\n");
                     }
                 }
 
@@ -310,7 +311,7 @@ namespace Lithnet.SshMA
                     if (!string.IsNullOrWhiteSpace(command.ExpectSuccess.Expect.DeclarationText))
                     {
                         TimeSpan timeout = new TimeSpan(0, 0, command.ExpectSuccess.Timeout);
-                        if (shell.Expect(command.ExpectSuccess.Expect.ExpandDeclaration(csentry, false), timeout) == null)
+                        if (shell.Expect(command.ExpectSuccess.Expect.ExpandDeclaration(csentry, false, false), timeout) == null)
                         {
                             throw new ExtensibleExtensionException("The asynchronous command did not return the expected result");
                         }
@@ -397,58 +398,6 @@ namespace Lithnet.SshMA
                 Logger.WriteLine("Shell session log:", LogLevel.Debug);
                 Logger.WriteLine(output, LogLevel.Debug);
             }
-        }
-        
-        /// <summary>
-        /// Gets a PrivateKeyFile object from the path specified in the configuration parameters
-        /// </summary>
-        /// <param name="config">The MA configuration parameters</param>
-        /// <returns>A PrivateKeyFile object</returns>
-        private static PrivateKeyFile GetPrivateKeyFile(KeyedCollection<string, ConfigParameter> config)
-        {
-            PrivateKeyFile file;
-
-            if (!config.Contains(MAParameterNames.PasswordOrPassphrase))
-            {
-                FileStream stream = new FileStream(config[MAParameterNames.PrivateKeyFile].Value, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                file = new PrivateKeyFile(
-                    stream);
-            }
-            else
-            {
-                FileStream stream = new FileStream(config[MAParameterNames.PrivateKeyFile].Value, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                file = new PrivateKeyFile(
-                    stream,
-                    GetPassword(config));
-            }
-
-            return file;
-        }
-
-        /// <summary>
-        /// Gets the password from the specified parameter
-        /// </summary>
-        /// <param name="config">The configuration parameters</param>
-        /// <returns>The unencrypted password</returns>
-        private static string GetPassword(KeyedCollection<string, ConfigParameter> config)
-        {
-            string passphrase = string.Empty;
-
-            if (config.Contains(MAParameterNames.PasswordOrPassphrase))
-            {
-                ConfigParameter parameter = config[MAParameterNames.PasswordOrPassphrase];
-
-                if (parameter.IsEncrypted)
-                {
-                    passphrase = parameter.SecureValue.ToUnsecureString();
-                }
-                else
-                {
-                    passphrase = parameter.Value;
-                }
-            }
-
-            return passphrase;
         }
     }
 }

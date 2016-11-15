@@ -10,15 +10,11 @@
 namespace Lithnet.SshMA
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Data.SqlClient;
     using System.Linq;
-    using System.Threading.Tasks;
     using Lithnet.Logging;
     using Microsoft.MetadirectoryServices;
-    using Renci.SshNet;
 
     /// <summary>
     /// The IMAExtensible2 management agent called by the FIM Synchronization Service
@@ -45,31 +41,11 @@ namespace Lithnet.SshMA
         /// The schema types specified for the current import run step
         /// </summary>
         private KeyedCollection<string, SchemaType> schemaTypes;
-        
-        /// <summary>
-        /// The default import page size
-        /// </summary>
-        private int importDefaultPageSize = 500;
-
-        /// <summary>
-        /// The maximum import page size
-        /// </summary>
-        private int importMaxPageSize = 1000;
-
-        /// <summary>
-        /// The default export page size
-        /// </summary>
-        private int exportDefaultPageSize = 100;
-
-        /// <summary>
-        /// The maximum export page size
-        /// </summary>
-        private int exportMaxPageSize = 200;
 
         /// <summary>
         /// The configuration parameters assigned to this run job
         /// </summary>
-        private KeyedCollection<string, ConfigParameter> configParameters;
+        internal static MAParameters MAParameters { get; private set; }
         
         /// <summary>
         /// Initializes a new instance of the ManagementAgent class
@@ -81,124 +57,27 @@ namespace Lithnet.SshMA
         /// <summary>
         /// Gets the maximum import page size
         /// </summary>
-        int IMAExtensible2CallImport.ImportMaxPageSize
-        {
-            get
-            {
-                return this.importMaxPageSize;
-            }
-        }
+        int IMAExtensible2CallImport.ImportMaxPageSize { get; } = 1000;
 
         /// <summary>
         /// Gets the default import page size
         /// </summary>
-        int IMAExtensible2CallImport.ImportDefaultPageSize
-        {
-            get
-            {
-                return this.importDefaultPageSize;
-            }
-        }
+        int IMAExtensible2CallImport.ImportDefaultPageSize { get; } = 500;
 
         /// <summary>
         /// Gets the default export page size
         /// </summary>
-        int IMAExtensible2CallExport.ExportDefaultPageSize
-        {
-            get
-            {
-                return this.exportDefaultPageSize;
-            }
-        }
+        int IMAExtensible2CallExport.ExportDefaultPageSize { get; } = 100;
 
         /// <summary>
         /// Gets the maximum export page size
         /// </summary>
-        int IMAExtensible2CallExport.ExportMaxPageSize
-        {
-            get
-            {
-                return this.exportMaxPageSize;
-            }
-        }
+        int IMAExtensible2CallExport.ExportMaxPageSize { get; } = 200;
 
         /// <summary>
         /// Gets or sets the type of import
         /// </summary>
         private OperationType ImportType { get; set; }
-
-        /// <summary>
-        /// Gets a value indicating whether debug mode is enabled
-        /// </summary>
-        private bool DebugEnabled
-        {
-            get
-            {
-                if (this.configParameters.Contains(MAParameterNames.DebugEnabled))
-                {
-                    return this.configParameters[MAParameterNames.DebugEnabled].Value == "1" ? true : false;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the location of the log file
-        /// </summary>
-        private string LogPath
-        {
-            get
-            {
-                return this.configParameters[MAParameterNames.LogPath].Value;
-            }
-        }
-
-        /// <summary>
-        /// Gets the host name
-        /// </summary>
-        private string HostName
-        {
-            get
-            {
-                return this.configParameters[MAParameterNames.HostName].Value;
-            }
-        }
-
-        /// <summary>
-        /// Gets the port
-        /// </summary>
-        private string Port
-        {
-            get
-            {
-                return this.configParameters[MAParameterNames.Port].Value;
-            }
-        }
-
-        /// <summary>
-        /// Gets the path to this MA's configuration file
-        /// </summary>
-        private string MAConfigurationFilePath
-        {
-            get
-            {
-                return this.configParameters[MAParameterNames.MAConfigurationFile].Value;
-            }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the debugger should be launched when an exception occurs
-        /// </summary>
-        private bool LaunchDebuggerOnException
-        {
-            get
-            {
-                return this.configParameters[MAParameterNames.LaunchDebuggerOnException].Value == "1" ? true : false;
-            }
-        }
 
         /// <summary>
         /// Gets the capabilities of this management agent
@@ -207,19 +86,22 @@ namespace Lithnet.SshMA
         /// <returns>The capabilities of this management agent</returns>
         MACapabilities IMAExtensible2GetCapabilitiesEx.GetCapabilitiesEx(KeyedCollection<string, ConfigParameter> configParameters)
         {
-            this.configParameters = configParameters;
-            this.LoadConfiguration();
+            ManagementAgent.MAParameters = new MAParameters( configParameters);
+            MAConfig.Load(ManagementAgent.MAParameters.MAConfigurationFilePath);
 
-            MACapabilities capabilities = new MACapabilities();
-            capabilities.ConcurrentOperation = true;
-            capabilities.ObjectRename = MAConfig.Capabilities.ObjectRenameAllowed;
-            capabilities.DeleteAddAsReplace = MAConfig.Capabilities.DeleteAddAsReplace;
-            capabilities.ExportType = MAConfig.Capabilities.ObjectUpdateMode;
-            capabilities.DeltaImport = MAConfig.Capabilities.DeltaImport;
-            capabilities.DistinguishedNameStyle = MADistinguishedNameStyle.Generic;
-            capabilities.NoReferenceValuesInFirstExport = false;
-            capabilities.Normalizations = MANormalizations.None;
-            capabilities.IsDNAsAnchor = false;
+            MACapabilities capabilities = new MACapabilities
+            {
+                ConcurrentOperation = true,
+                ObjectRename = MAConfig.Capabilities.ObjectRenameAllowed,
+                DeleteAddAsReplace = MAConfig.Capabilities.DeleteAddAsReplace,
+                ExportType = MAConfig.Capabilities.ObjectUpdateMode,
+                DeltaImport = MAConfig.Capabilities.DeltaImport,
+                DistinguishedNameStyle = MADistinguishedNameStyle.Generic,
+                NoReferenceValuesInFirstExport = false,
+                Normalizations = MANormalizations.None,
+                IsDNAsAnchor = false
+            };
+
             return capabilities;
         }
         
@@ -250,8 +132,8 @@ namespace Lithnet.SshMA
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateEncryptedStringParameter(MAParameterNames.PasswordOrPassphrase, string.Empty, string.Empty));
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateDividerParameter());
                     configParametersDefinitions.Add(ConfigParameterDefinition.CreateStringParameter(MAParameterNames.LogPath, string.Empty, string.Empty));
-                    configParametersDefinitions.Add(ConfigParameterDefinition.CreateCheckBoxParameter(MAParameterNames.DebugEnabled, false));
-                    configParametersDefinitions.Add(ConfigParameterDefinition.CreateCheckBoxParameter(MAParameterNames.LaunchDebuggerOnException, false));
+                    // configParametersDefinitions.Add(ConfigParameterDefinition.CreateCheckBoxParameter(MAParameterNames.DebugEnabled, false));
+                    //configParametersDefinitions.Add(ConfigParameterDefinition.CreateCheckBoxParameter(MAParameterNames.LaunchDebuggerOnException, false));
                     break;
 
                 case ConfigParameterPage.Global:
@@ -304,12 +186,12 @@ namespace Lithnet.SshMA
         {
             try
             {
-                this.configParameters = configParameters;
-                Logger.LogPath = this.LogPath;
+                ManagementAgent.MAParameters = new MAParameters(configParameters);
+                Logger.LogPath = ManagementAgent.MAParameters.LogPath;
                 Logger.WriteSeparatorLine('*');
                 Logger.WriteLine("Loading Schema");
 
-                this.LoadConfiguration();
+                MAConfig.Load(ManagementAgent.MAParameters.MAConfigurationFilePath);
 
                 Schema schema = Schema.Create();
 
@@ -354,20 +236,14 @@ namespace Lithnet.SshMA
         {
             try
             {
-                this.configParameters = configParameters;
-
-                if (this.DebugEnabled)
-                {
-                    System.Diagnostics.Debugger.Launch();
-                }
-
-                Logger.LogPath = this.LogPath;
+                ManagementAgent.MAParameters = new MAParameters(configParameters);
+                Logger.LogPath = ManagementAgent.MAParameters.LogPath;
                 Logger.WriteSeparatorLine('*');
                 Logger.WriteLine("Starting Import");
 
-                this.LoadConfiguration();
+                MAConfig.Load(ManagementAgent.MAParameters.MAConfigurationFilePath);
 
-                SshConnection.OpenSshConnection(this.configParameters);
+                SshConnection.OpenSshConnection(ManagementAgent.MAParameters);
                 OperationBase operation;
                 this.ImportType = importRunStep.ImportType;
                 this.schemaTypes = types.Types;
@@ -519,16 +395,14 @@ namespace Lithnet.SshMA
         {
             try
             {
-                this.configParameters = configParameters;
+                ManagementAgent.MAParameters = new MAParameters(configParameters);
+                Logger.LogPath = ManagementAgent.MAParameters.LogPath;
+                Logger.WriteSeparatorLine('*');
+                Logger.WriteLine("Starting Export");
 
-                if (this.DebugEnabled)
-                {
-                    System.Diagnostics.Debugger.Launch();
-                }
+                MAConfig.Load(ManagementAgent.MAParameters.MAConfigurationFilePath);
 
-                Logger.LogPath = this.LogPath;
-                this.LoadConfiguration();
-                SshConnection.OpenSshConnection(this.configParameters);
+                SshConnection.OpenSshConnection(ManagementAgent.MAParameters);
 
                 OperationBase operation = MAConfig.GlobalOperations.FirstOrDefault(t => t is ExportStartOperation);
 
@@ -545,9 +419,6 @@ namespace Lithnet.SshMA
                         throw new ExtensibleExtensionException("Export start operation failed", ex);
                     }
                 }
-
-                Logger.WriteSeparatorLine('*');
-                Logger.WriteLine("Starting Export");
             }
             catch (ExtensibleExtensionException)
             {
@@ -656,16 +527,14 @@ namespace Lithnet.SshMA
         {
             try
             {
-                this.configParameters = configParameters;
+                ManagementAgent.MAParameters = new MAParameters(configParameters);
+                Logger.LogPath = ManagementAgent.MAParameters.LogPath;
+                Logger.WriteSeparatorLine('*');
+                Logger.WriteLine("Starting password operation");
 
-                if (this.DebugEnabled)
-                {
-                    System.Diagnostics.Debugger.Launch();
-                }
+                MAConfig.Load(ManagementAgent.MAParameters.MAConfigurationFilePath);
 
-                Logger.LogPath = this.LogPath;
-                this.LoadConfiguration();
-                SshConnection.OpenSshConnection(this.configParameters);
+                SshConnection.OpenSshConnection(ManagementAgent.MAParameters);
 
                 OperationBase operation = MAConfig.GlobalOperations.FirstOrDefault(t => t is PasswordStartOperation);
 
@@ -682,9 +551,6 @@ namespace Lithnet.SshMA
                         throw new ExtensibleExtensionException("Password start operation failed", ex);
                     }
                 }
-
-                Logger.WriteSeparatorLine('*');
-                Logger.WriteLine("Starting password operation");
             }
             catch (ExtensibleExtensionException)
             {
@@ -830,7 +696,7 @@ namespace Lithnet.SshMA
         /// <returns>A CSEntryChangeResult object with the correct error code for the exception that was encountered</returns>
         private CSEntryChangeResult GetExportChangeResultFromException(CSEntryChange csentryChange, Exception ex)
         {
-            if (this.LaunchDebuggerOnException)
+            if (ManagementAgent.MAParameters.LaunchDebuggerOnException)
             {
                 System.Diagnostics.Debugger.Launch();
             }
@@ -849,21 +715,6 @@ namespace Lithnet.SshMA
                 Logger.WriteLine(string.Format("An unexpected exception occured for csentry {0} with DN {1}", csentryChange.Identifier.ToString(), csentryChange.DN ?? string.Empty));
                 Logger.WriteException(ex);
                 return CSEntryChangeResult.Create(csentryChange.Identifier, null, MAExportError.ExportErrorCustomContinueRun, ex.Message, ex.StackTrace);
-            }
-        }
-
-        /// <summary>
-        /// Loads the MA configuration
-        /// </summary>
-        private void LoadConfiguration()
-        {
-            if (System.IO.Path.IsPathRooted(this.MAConfigurationFilePath))
-            {
-                MAConfig.Load(this.MAConfigurationFilePath);
-            }
-            else
-            {
-                MAConfig.Load(System.IO.Path.Combine(Utils.ExtensionsDirectory, this.MAConfigurationFilePath));
             }
         }
     }

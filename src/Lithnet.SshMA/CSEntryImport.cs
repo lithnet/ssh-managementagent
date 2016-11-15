@@ -102,13 +102,13 @@ namespace Lithnet.SshMA
                         temporaryChange.ObjectModificationType = ObjectModificationType.Update;
                         temporaryChange.ObjectType = csentry.ObjectType;
                         PopulateCSEntryWithMatches(schemaType, operation, match, temporaryChange);
-                        csentry.DN = MASchema.Objects[schemaType.Name].DNFormat.ExpandDeclaration(temporaryChange, true);
+                        csentry.DN = MASchema.Objects[schemaType.Name].DNFormat.ExpandDeclaration(temporaryChange, true, false);
                         csentry.AnchorAttributes.Add(AnchorAttribute.Create("entry-dn", csentry.DN));
                     }
                     else
                     {
                         PopulateCSEntryWithMatches(schemaType, operation, match, csentry);
-                        csentry.DN = MASchema.Objects[schemaType.Name].DNFormat.ExpandDeclaration(csentry, true);
+                        csentry.DN = MASchema.Objects[schemaType.Name].DNFormat.ExpandDeclaration(csentry, true, false);
                         csentry.AttributeChanges.Add(AttributeChange.CreateAttributeAdd("entry-dn", csentry.DN));
                     }
 

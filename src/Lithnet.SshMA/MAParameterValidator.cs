@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="MAParameterValidator.cs" company="Monash University">
+// <copyright file="MAParameterValidator.cs" company="Lithnet">
 // The Microsoft Public License (Ms-PL) governs use of the accompanying software. 
 // If you use the software, you accept this license. 
 // If you do not accept the license, do not use the software.
@@ -51,7 +51,7 @@ namespace Lithnet.SshMA
                 }
             }
 
-            if (!System.IO.File.Exists(configParameters[MAParameterNames.MAConfigurationFile].Value))
+            if (!System.IO.File.Exists(path))
             {
                 myResults.Code = ParameterValidationResultCode.Failure;
                 myResults.ErrorMessage = "The configuration file does not exist";
@@ -114,7 +114,7 @@ namespace Lithnet.SshMA
 
             try
             {
-                SshConnection.OpenSshConnection(configParameters);
+                SshConnection.OpenSshConnection(new MAParameters(configParameters));
                 SshConnection.CloseSshConnection();
             }
             catch (Exception ex)

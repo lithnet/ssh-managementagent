@@ -30,6 +30,8 @@ namespace Lithnet.SshMA
             BuiltInVariables.Add("dn");
             BuiltInVariables.Add("newpassword");
             BuiltInVariables.Add("oldpassword");
+            BuiltInVariables.Add("sshma:username");
+            BuiltInVariables.Add("sshma:password");
         }
 
         /// <summary>
@@ -121,6 +123,8 @@ namespace Lithnet.SshMA
 
                 case "newpassword":
                 case "oldpassword":
+                case "sshma:username":
+                case "ssham:password":
                     return AttributeType.String;
 
                 default:

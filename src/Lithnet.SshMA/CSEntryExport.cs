@@ -104,9 +104,9 @@ namespace Lithnet.SshMA
         /// <returns>A constructed DN for the specified object</returns>
         private static string ConstructDNFromCSEntryChange(CSEntryChange csentry)
         {
-            return MASchema.Objects[csentry.ObjectType].DNFormat.ExpandDeclaration(csentry, true);
+            return MASchema.Objects[csentry.ObjectType].DNFormat.ExpandDeclaration(csentry, true, false);
         }
-        
+
         /// <summary>
         /// Adds a new object to the target system
         /// </summary>
@@ -121,7 +121,7 @@ namespace Lithnet.SshMA
             }
 
             OperationBase operation = group.ObjectOperations.FirstOrDefault(t => t is ExportAddOperation);
-            
+
             if (operation == null)
             {
                 throw new InvalidOperationException("An applicable add operation could not be found in the configuration file");
