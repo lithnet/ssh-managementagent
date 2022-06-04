@@ -11,8 +11,6 @@ namespace Lithnet.SshMA
 {
     using System;
     using System.Collections.Generic;
-    using System.Data;
-    using System.Data.SqlClient;
     using System.Linq;
     using Lithnet.Logging;
     using Microsoft.MetadirectoryServices;
